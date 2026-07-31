@@ -22,17 +22,32 @@ export interface RosterMember {
 
 type SortKey = "role" | "name" | "exp" | "ehp" | "ehb";
 
-// Rough rank ordering so leaders float to the top on the default "role" sort.
-const ROLE_RANK: Record<string, number> = {
-  owner: 0,
-  deputy_owner: 1,
-  administrator: 2,
-  moderator: 3,
-  leader: 4,
-  officer: 5,
-};
+// FE Prestige's clan rank hierarchy, highest → lowest. OSRS clan rank titles
+// are cosmetic and each clan slots them into its own order, which the WOM API
+// doesn't expose — so the hierarchy has to be defined here from the clan's own
+// ranking. Admins (owner/deputy/moderator) sit on top; any role not listed
+// shares the fallback weight and just sorts by XP among the rest.
+const ROLE_ORDER = [
+  "owner",
+  "deputy_owner",
+  "moderator",
+  "beast",
+  "skulled",
+  "maxed",
+  "tzkal",
+  "gamer",
+  "elite",
+  "raider",
+  "completionist",
+  "explorer",
+  "athlete",
+  "adventurer",
+] as const;
+const ROLE_RANK: Record<string, number> = Object.fromEntries(
+  ROLE_ORDER.map((role, i) => [role, i]),
+);
 const roleWeight = (role: string | null) =>
-  role && role in ROLE_RANK ? ROLE_RANK[role] : 100;
+  role && role in ROLE_RANK ? ROLE_RANK[role] : ROLE_ORDER.length;
 
 export function RosterTable({ members }: { members: RosterMember[] }) {
   const [query, setQuery] = useState("");
