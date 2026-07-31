@@ -6,7 +6,7 @@ import { formatNumber, womPlayerUrl } from "@/wom/format";
 import type { GainEntry } from "@/wom/leaderboards";
 import { type Metric, metricName } from "@/wom/metrics";
 
-import { MetricIcon, PlayerTypeIcon } from "./Icon";
+import { PlayerTypeIcon } from "./Icon";
 import { MetricSelect } from "./MetricSelect";
 import { Pagination } from "./Pagination";
 
@@ -60,15 +60,14 @@ export function GainsBoard({
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
-          Metric
-          <MetricIcon metric={metric} size={22} />
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
+          <span>Metric</span>
           <MetricSelect
             value={metric}
             onChange={selectMetric}
             metrics={periodMetrics}
           />
-        </label>
+        </div>
 
         <div className="inline-flex overflow-hidden rounded-lg border border-border">
           {PERIODS.map((p) => (
