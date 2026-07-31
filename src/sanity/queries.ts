@@ -45,13 +45,3 @@ export const pageBySlugQuery = defineQuery(
 export const pageSlugsQuery = defineQuery(
   `*[_type == "page" && defined(slug.current) && isHome != true].slug.current`,
 );
-
-// Optional roster.
-export const membersQuery = defineQuery(`*[_type == "member"]
-  | order(order asc, name asc){
-    _id,
-    name,
-    role,
-    avatar,
-    joinedDate
-  }`);

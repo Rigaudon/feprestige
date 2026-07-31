@@ -38,11 +38,3 @@ export interface PageDoc {
   heroImage?: ImageWithAlt;
   body?: PortableTextBlock[];
 }
-
-export interface Member {
-  _id: string;
-  name?: string;
-  role?: string;
-  avatar?: SanityImageSource;
-  joinedDate?: string;
-}
