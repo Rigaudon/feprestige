@@ -46,6 +46,9 @@ cloudflare-env.d.ts
 # sanity typegen output
 /src/sanity/sanity.types.ts
 
+# private deployment notes (LAN IP, SSH key path, account details)
+DEPLOYMENT.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

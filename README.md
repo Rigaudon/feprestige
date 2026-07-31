@@ -19,7 +19,7 @@ Requirements: Node 20+ and npm.
 ```bash
 npm install
 cp .env.example .env.local      # then fill in the values (see below)
-npm run dev                     # http://localhost:3000  (site) and /admin (Studio)
+npm run dev                     # http://localhost:3333  (site) and /admin (Studio)
 ```
 
 The site renders even before Sanity is connected — you'll see a friendly empty
@@ -42,7 +42,9 @@ state until content exists.
    create a new project, and add a `production` dataset. Copy the **Project ID** into
    `NEXT_PUBLIC_SANITY_PROJECT_ID`.
 2. **Allow the site to talk to Sanity (CORS).** In the project's *API → CORS origins*,
-   add `http://localhost:3000` and your production URL (allow credentials).
+   add `http://localhost:3333` (the app's default dev/start port, matching Sanity's own
+   Studio default) and your production URL (allow credentials). Only the embedded Studio
+   needs this — public pages never call Sanity from the browser.
 3. `npm run dev` and open `/admin`. Log in and start creating content.
 
 ### Content model
