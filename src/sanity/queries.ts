@@ -18,7 +18,9 @@ export const settingsQuery = defineQuery(`*[_type == "siteSettings"][0]{
   logo,
   primaryCta,
   socialLinks,
-  footerText
+  footerText,
+  womGroupId,
+  showWomTabs
 }`);
 
 // Nav items: pages flagged to show, ordered. Home is linked separately as "/".

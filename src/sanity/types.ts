@@ -19,6 +19,8 @@ export interface Settings {
   primaryCta?: { label?: string; url?: string };
   socialLinks?: { platform?: string; url?: string }[];
   footerText?: string;
+  womGroupId?: number;
+  showWomTabs?: boolean;
 }
 
 export interface NavItem {

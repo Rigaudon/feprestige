@@ -58,6 +58,25 @@ export const siteSettings = defineType({
       type: "text",
       rows: 2,
     }),
+    defineField({
+      name: "womGroupId",
+      title: "Wise Old Man group ID",
+      type: "number",
+      description:
+        "The clan's Wise Old Man group ID — the number in its URL, e.g. " +
+        "wiseoldman.net/groups/1234 → 1234. Set this to enable the live " +
+        "Roster, Hiscores and Gains tabs. Leave blank to hide them.",
+      validation: (rule) => rule.positive().integer(),
+    }),
+    defineField({
+      name: "showWomTabs",
+      title: "Show Wise Old Man tabs",
+      type: "boolean",
+      description:
+        "Show the Roster / Hiscores / Gains tabs in the nav (requires a group " +
+        "ID above). Turn off to hide them without removing the group ID.",
+      initialValue: true,
+    }),
   ],
   preview: {
     prepare: () => ({ title: "Site Settings" }),

@@ -50,15 +50,35 @@ state until content exists.
 ### Content model
 
 - **Site Settings** (one document): clan name, tagline, logo, primary button
-  (e.g. Discord invite), social links, footer text.
+  (e.g. Discord invite), social links, footer text, and the **Wise Old Man group
+  ID** (see below).
 - **Page** (one per tab): title, slug, body (rich text + images), hero image.
   - Toggle **Show in navigation** and set **Navigation order** to control the tabs.
   - Flag exactly one page **Use as home page** — it renders at the site root (`/`).
 - **Member** (optional roster): name, role, avatar. The schema is ready; wire up a
-  roster tab with `membersQuery` in `src/sanity/queries.ts` when wanted.
+  roster tab with `membersQuery` in `src/sanity/queries.ts` when wanted. (Note: the
+  live WOM Roster tab below usually replaces the need for this.)
 
 Navigation, the home page, and all page content come entirely from Sanity, so
 editors can add/rename/reorder tabs without any code changes.
+
+### Live clan data (Wise Old Man)
+
+Set **Wise Old Man group ID** in Site Settings (the number in the group's URL,
+e.g. `wiseoldman.net/groups/1234` → `1234`) to enable three live tabs, fetched
+from the free [WOM API](https://docs.wiseoldman.net) at build time and cached for
+1h — visitors' browsers never contact WOM:
+
+- **Roster** (`/roster`) — live members, ranks, total XP / EHP / EHB.
+- **Hiscores** (`/hiscores`) — leaderboards for any skill, boss or activity.
+- **Gains** (`/gains`) — top gainers this week / this month.
+
+Uncheck **Show Wise Old Man tabs** to hide them without clearing the group ID.
+
+> **Reserved slugs:** `roster`, `hiscores` and `gains` are code routes. Don't
+> create Sanity pages with those slugs — they'd be shadowed and unreachable.
+> No API key is required. If you request one from WOM (raises the rate limit),
+> set it as a server-only `WOM_API_KEY` env var — never `NEXT_PUBLIC_`.
 
 ---
 

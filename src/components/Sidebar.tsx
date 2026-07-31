@@ -15,9 +15,12 @@ import type { NavItem, Settings } from "@/sanity/types";
 export function Sidebar({
   settings,
   navItems,
+  extraNav = [],
 }: {
   settings: Settings | null;
   navItems: NavItem[];
+  // Code-driven links appended after the Sanity page tabs (e.g. WOM tabs).
+  extraNav?: { title: string; href: string }[];
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -30,6 +33,35 @@ export function Sidebar({
 
   const isActive = (item: NavItem) =>
     item.isHome ? pathname === "/" : pathname === `/${item.slug}`;
+
+  // Shared nav link markup for both Sanity page tabs and code-driven links.
+  const renderLink = (key: string, href: string, label: string, active: boolean) => (
+    <Link
+      key={key}
+      href={href}
+      onClick={close}
+      className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-display text-sm font-semibold uppercase tracking-wide transition-all ${
+        active
+          ? "bg-surface-2 text-white"
+          : "text-neutral-400 hover:bg-surface hover:text-white"
+      }`}
+    >
+      {/* Neon spine on the active / hovered item. */}
+      <span
+        className={`absolute left-0 top-1/2 h-5 -translate-y-1/2 rounded-full bg-gradient-to-b from-accent to-accent-hot transition-all ${
+          active ? "w-1 opacity-100" : "w-1 opacity-0 group-hover:opacity-60"
+        }`}
+      />
+      <span
+        className={`h-1.5 w-1.5 rounded-full transition-colors ${
+          active
+            ? "bg-accent shadow-[0_0_8px_1px_var(--color-accent)]"
+            : "bg-neutral-600 group-hover:bg-accent"
+        }`}
+      />
+      {label}
+    </Link>
+  );
 
   const brandBlock = (
     <Link href="/" onClick={close} className="group flex items-center gap-3">
@@ -64,36 +96,30 @@ export function Sidebar({
       ) : null}
 
       <nav className="flex flex-1 flex-col gap-1">
-        {navItems.map((item) => {
-          const active = isActive(item);
-          return (
-            <Link
-              key={item.slug || "home"}
-              href={item.isHome ? "/" : `/${item.slug}`}
-              onClick={close}
-              className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-display text-sm font-semibold uppercase tracking-wide transition-all ${
-                active
-                  ? "bg-surface-2 text-white"
-                  : "text-neutral-400 hover:bg-surface hover:text-white"
-              }`}
-            >
-              {/* Neon spine on the active / hovered item. */}
-              <span
-                className={`absolute left-0 top-1/2 h-5 -translate-y-1/2 rounded-full bg-gradient-to-b from-accent to-accent-hot transition-all ${
-                  active ? "w-1 opacity-100" : "w-1 opacity-0 group-hover:opacity-60"
-                }`}
-              />
-              <span
-                className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                  active
-                    ? "bg-accent shadow-[0_0_8px_1px_var(--color-accent)]"
-                    : "bg-neutral-600 group-hover:bg-accent"
-                }`}
-              />
-              {item.title}
-            </Link>
-          );
-        })}
+        {navItems.map((item) =>
+          renderLink(
+            item.slug || "home",
+            item.isHome ? "/" : `/${item.slug}`,
+            item.title ?? "",
+            isActive(item),
+          ),
+        )}
+
+        {extraNav.length > 0 ? (
+          <>
+            <p className="mt-4 px-3 pb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-600">
+              Clan Stats
+            </p>
+            {extraNav.map((item) =>
+              renderLink(
+                item.href,
+                item.href,
+                item.title,
+                pathname === item.href,
+              ),
+            )}
+          </>
+        ) : null}
       </nav>
 
       <div className="flex flex-col gap-4 border-t border-border pt-4">

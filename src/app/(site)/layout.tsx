@@ -16,9 +16,22 @@ export default async function SiteLayout({
     sanityFetch<NavItem[]>({ query: navQuery, fallback: [] }),
   ]);
 
+  // Live Wise Old Man tabs, shown only when a group id is set and the owner
+  // hasn't hidden them. These are code routes (not Sanity pages), so they're
+  // appended to the Sanity-driven nav.
+  const womEnabled =
+    Boolean(settings?.womGroupId) && settings?.showWomTabs !== false;
+  const womNav = womEnabled
+    ? [
+        { title: "Roster", href: "/roster" },
+        { title: "Hiscores", href: "/hiscores" },
+        { title: "Gains", href: "/gains" },
+      ]
+    : [];
+
   return (
     <div className="min-h-screen lg:pl-64">
-      <Sidebar settings={settings} navItems={navItems} />
+      <Sidebar settings={settings} navItems={navItems} extraNav={womNav} />
       <main className="min-h-screen">{children}</main>
     </div>
   );
