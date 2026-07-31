@@ -29,13 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
     query: settingsQuery,
     fallback: null,
   });
-  const title = settings?.title || "Clan Site";
+  const title = settings?.title || "FE Prestige";
   return {
     title: {
       default: title,
       template: `%s · ${title}`,
     },
-    description: settings?.tagline || "Welcome to our clan.",
+    description: settings?.tagline || "Welcome to FE Prestige.",
   };
 }
 

@@ -23,7 +23,7 @@ export function Sidebar({
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
-  const brand = settings?.title || "Clan Site";
+  const brand = settings?.title || "FE Prestige";
   const hasLogo = Boolean(settings?.logo);
   const socials = settings?.socialLinks?.filter((s) => s.url && s.platform) ?? [];
   const cta = settings?.primaryCta;
