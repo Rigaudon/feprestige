@@ -24,6 +24,18 @@
   "r2_buckets": [
     { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "feprestige-cache" }
   ],
+  // Tag cache for on-demand revalidation. revalidateTag() (the /api/revalidate
+  // webhook) records invalidations here; without it, tag revalidation is a no-op
+  // on Cloudflare and publishes only surface via the 1h time-based revalidate.
+  // Binding name is fixed by the OpenNext d1-next-tag-cache override. Create once:
+  //   npx wrangler d1 create feprestige-tags
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "feprestige-tags",
+      "database_id": "b97e035a-e593-4c00-a16c-002b03f6d425"
+    }
+  ],
   // Attaches the custom domain on deploy. Requires the zone (feprestige.com) to
   // live in the same Cloudflare account — it does, since the domain is registered
   // there. Cloudflare provisions the DNS record + TLS cert automatically.
