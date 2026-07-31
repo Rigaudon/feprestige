@@ -75,7 +75,7 @@ export function GainsBoard({
               key={p.key}
               type="button"
               onClick={() => selectPeriod(p.key)}
-              className={`px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide transition-colors ${
+              className={`px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide transition-all active:scale-95 ${
                 period === p.key
                   ? "bg-surface-2 text-white"
                   : "bg-surface text-neutral-400 hover:text-white"

@@ -24,6 +24,41 @@
   color-scheme: dark;
 }
 
+/* ── Interaction foundation ────────────────────────────────────────────────
+   Consistent keyboard focus, a real pointer cursor on buttons, and respect for
+   the OS "reduce motion" preference. Applied globally so every current and
+   future control inherits it without per-element wiring. */
+
+/* Visible accent focus ring for keyboard users only. Mouse clicks
+   (:focus:not(:focus-visible)) stay clean — no ring on click. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.25);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Tailwind v4's preflight no longer forces this; without it enabled buttons
+   show the default arrow cursor. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   background-color: var(--color-bg);
   color: #ededed;

@@ -63,7 +63,7 @@ export function MetricSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex min-w-44 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-white outline-none transition-colors hover:border-accent focus:border-accent"
+        className="flex min-w-44 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-white outline-none transition-all hover:border-accent focus:border-accent active:scale-[0.98]"
       >
         <MetricIcon metric={value} size={18} />
         <span className="truncate">{metricName(value)}</span>

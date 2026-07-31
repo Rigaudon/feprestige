@@ -71,10 +71,10 @@ export function Sidebar({
           alt={brand}
           width={40}
           height={40}
-          className="h-10 w-10 rounded-lg ring-1 ring-border"
+          className="h-10 w-10 rounded-lg ring-1 ring-border transition-all group-hover:ring-accent group-hover:brightness-110"
         />
       ) : (
-        <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-hot font-display text-lg font-bold text-white shadow-[0_0_20px_-4px_var(--color-accent)]">
+        <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-hot font-display text-lg font-bold text-white shadow-[0_0_20px_-4px_var(--color-accent)] transition-all group-hover:brightness-110 group-hover:shadow-[0_0_24px_-2px_var(--color-accent)]">
           {brand.charAt(0).toUpperCase()}
         </span>
       )}
@@ -128,7 +128,7 @@ export function Sidebar({
             href={cta.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-lg bg-gradient-to-r from-accent to-accent-hot px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-[0_0_20px_-6px_var(--color-accent)] transition-all hover:shadow-[0_0_28px_-4px_var(--color-accent-hot)] hover:brightness-110"
+            className="flex items-center justify-center rounded-lg bg-gradient-to-r from-accent to-accent-hot px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-[0_0_20px_-6px_var(--color-accent)] transition-all hover:shadow-[0_0_28px_-4px_var(--color-accent-hot)] hover:brightness-110 active:scale-[0.98] active:brightness-95"
           >
             {cta.label}
           </a>
@@ -142,7 +142,7 @@ export function Sidebar({
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-neutral-400 transition-colors hover:border-accent hover:text-accent-strong"
+                className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-neutral-400 transition-all hover:border-accent hover:text-accent-strong active:scale-95"
               >
                 {s.platform}
               </a>
@@ -168,7 +168,7 @@ export function Sidebar({
           aria-label="Toggle navigation"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="grid h-10 w-10 place-items-center rounded-lg border border-border text-neutral-300 transition-colors hover:border-accent hover:text-accent-strong"
+          className="grid h-10 w-10 place-items-center rounded-lg border border-border text-neutral-300 transition-all hover:border-accent hover:text-accent-strong active:scale-95"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
             {open ? (

@@ -1,3 +1,4 @@
+import { CursorGlow } from "@/components/CursorGlow";
 import { Sidebar } from "@/components/Sidebar";
 import { sanityFetch } from "@/sanity/client";
 import { navQuery, settingsQuery } from "@/sanity/queries";
@@ -31,8 +32,9 @@ export default async function SiteLayout({
 
   return (
     <div className="min-h-screen lg:pl-64">
+      <CursorGlow />
       <Sidebar settings={settings} navItems={navItems} extraNav={womNav} />
-      <main className="min-h-screen">{children}</main>
+      <main className="relative z-10 min-h-screen">{children}</main>
     </div>
   );
 }
