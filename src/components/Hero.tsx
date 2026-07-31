@@ -4,7 +4,7 @@ import { urlFor } from "@/sanity/image";
 import type { ImageWithAlt } from "@/sanity/types";
 
 // Page hero: title, optional subtitle, optional background image. Styled with
-// the violet gaming accent — glow wash, tech eyebrow, angular accent bar.
+// the violet gaming accent — tech eyebrow, angular accent bar.
 export function Hero({
   title,
   subtitle,
@@ -28,7 +28,6 @@ export function Hero({
             className="object-cover opacity-45"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/70 to-bg/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-accent/15 to-transparent" />
         </>
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(40rem_24rem_at_10%_-20%,rgba(168,85,247,0.28),transparent_60%),radial-gradient(36rem_24rem_at_90%_120%,rgba(236,72,153,0.16),transparent_60%)]" />
