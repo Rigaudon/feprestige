@@ -12,6 +12,12 @@ export interface ImageWithAlt {
   crop?: unknown;
 }
 
+export interface VideoEmbed {
+  _type?: "videoEmbed";
+  url?: string;
+  caption?: string;
+}
+
 export interface Settings {
   title?: string;
   tagline?: string;

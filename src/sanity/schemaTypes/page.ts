@@ -71,6 +71,7 @@ export const page = defineType({
             defineField({ name: "alt", title: "Alt text", type: "string" }),
           ],
         }),
+        defineArrayMember({ type: "videoEmbed" }),
       ],
     }),
   ],

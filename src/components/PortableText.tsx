@@ -6,7 +6,8 @@ import type { PortableTextBlock } from "next-sanity";
 import Image from "next/image";
 
 import { urlFor } from "@/sanity/image";
-import type { ImageWithAlt } from "@/sanity/types";
+import type { ImageWithAlt, VideoEmbed } from "@/sanity/types";
+import { parseVideoUrl } from "@/sanity/video";
 
 // Rendering rules for Portable Text. Editors write rich text + drop in images
 // in the Studio; this maps that structured content to styled HTML.
@@ -26,6 +27,29 @@ const components: PortableTextComponents = {
           {value.alt ? (
             <figcaption className="mt-2 text-center text-sm text-neutral-400">
               {value.alt}
+            </figcaption>
+          ) : null}
+        </figure>
+      );
+    },
+    videoEmbed: ({ value }: { value: VideoEmbed }) => {
+      const info = value?.url ? parseVideoUrl(value.url) : null;
+      if (!info) return null;
+      return (
+        <figure className="my-8">
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+            <iframe
+              src={info.embedUrl}
+              title={value.caption || "Embedded video"}
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
+          {value.caption ? (
+            <figcaption className="mt-2 text-center text-sm text-neutral-400">
+              {value.caption}
             </figcaption>
           ) : null}
         </figure>
