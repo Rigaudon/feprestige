@@ -6,6 +6,7 @@ import { formatMetricValue, womPlayerUrl } from "@/wom/format";
 import type { LeaderEntry } from "@/wom/leaderboards";
 import { type Metric, METRIC_PROPS, metricName } from "@/wom/metrics";
 
+import { MetricIcon, PlayerTypeIcon } from "./Icon";
 import { MetricSelect } from "./MetricSelect";
 import { Pagination } from "./Pagination";
 
@@ -45,6 +46,7 @@ export function HiscoresBoard({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
           Metric
+          <MetricIcon metric={metric} size={22} />
           <MetricSelect value={metric} onChange={selectMetric} metrics={metrics} />
         </label>
         <span className="ml-auto font-mono text-xs uppercase tracking-wider text-neutral-500">
@@ -75,9 +77,7 @@ export function HiscoresBoard({
               >
                 {e.n}
                 {e.t ? (
-                  <span className="ml-2 rounded border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-neutral-400">
-                    {e.t}
-                  </span>
+                  <PlayerTypeIcon type={e.t} className="ml-2 align-[-0.1em]" />
                 ) : null}
               </a>
               {isSkill && e.l !== undefined ? (

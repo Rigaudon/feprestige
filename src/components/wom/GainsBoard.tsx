@@ -6,6 +6,7 @@ import { formatNumber, womPlayerUrl } from "@/wom/format";
 import type { GainEntry } from "@/wom/leaderboards";
 import { type Metric, metricName } from "@/wom/metrics";
 
+import { MetricIcon, PlayerTypeIcon } from "./Icon";
 import { MetricSelect } from "./MetricSelect";
 import { Pagination } from "./Pagination";
 
@@ -61,6 +62,7 @@ export function GainsBoard({
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
           Metric
+          <MetricIcon metric={metric} size={22} />
           <MetricSelect
             value={metric}
             onChange={selectMetric}
@@ -119,6 +121,9 @@ export function GainsBoard({
                     className="flex-1 truncate font-display font-semibold text-white transition-colors hover:text-accent-strong"
                   >
                     {e.n}
+                    {e.t ? (
+                      <PlayerTypeIcon type={e.t} className="ml-2 align-[-0.1em]" />
+                    ) : null}
                   </a>
                   <span className="w-28 text-right font-display font-semibold tabular-nums text-accent-strong">
                     +{formatNumber(e.g)}

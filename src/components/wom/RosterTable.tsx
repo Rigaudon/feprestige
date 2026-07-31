@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { formatNumber, formatRole, womPlayerUrl } from "@/wom/format";
 
+import { GroupRoleIcon, PlayerTypeIcon } from "./Icon";
 import { Pagination } from "./Pagination";
 
 const PAGE_SIZE = 25;
@@ -137,14 +138,13 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
                   >
                     {m.displayName}
                   </a>
-                  {m.type && m.type !== "regular" && m.type !== "unknown" ? (
-                    <span className="ml-2 rounded border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-neutral-400">
-                      {m.type}
-                    </span>
-                  ) : null}
+                  <PlayerTypeIcon type={m.type} className="ml-2 align-[-0.1em]" />
                 </td>
                 <td className="px-4 py-3 text-neutral-300">
-                  {formatRole(m.role)}
+                  <span className="flex items-center gap-2">
+                    <GroupRoleIcon role={m.role} />
+                    {formatRole(m.role)}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums text-neutral-300">
                   {formatNumber(m.exp)}

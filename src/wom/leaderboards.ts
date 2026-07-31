@@ -23,6 +23,7 @@ export interface LeaderEntry {
 export interface GainEntry {
   n: string;
   u: string;
+  t?: string; // account type, only when notable (ironman variants)
   g: number; // gained
 }
 
@@ -77,6 +78,8 @@ export function buildGainLeaderboards(
     return { player: e.player, gains };
   });
 
+  const typeOf = (player: BulkGainsEntry["player"]) => notableType(player.type);
+
   const out: Record<string, GainEntry[]> = {};
 
   for (const metric of ALL_METRICS) {
@@ -88,11 +91,16 @@ export function buildGainLeaderboards(
 
     if (ranked.length === 0) continue;
 
-    out[metric] = ranked.map(({ player, g }) => ({
-      n: player.displayName,
-      u: player.username,
-      g,
-    }));
+    out[metric] = ranked.map(({ player, g }) => {
+      const entry: GainEntry = {
+        n: player.displayName,
+        u: player.username,
+        g,
+      };
+      const t = typeOf(player);
+      if (t) entry.t = t;
+      return entry;
+    });
   }
 
   return out;
