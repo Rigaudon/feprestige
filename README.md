@@ -43,8 +43,8 @@ state until content exists.
    `NEXT_PUBLIC_SANITY_PROJECT_ID`.
 2. **Allow the site to talk to Sanity (CORS).** In the project's *API → CORS origins*,
    add `http://localhost:3333` (the app's default dev/start port, matching Sanity's own
-   Studio default) and your production URL (allow credentials). Only the embedded Studio
-   needs this — public pages never call Sanity from the browser.
+   Studio default) and your production URL `https://feprestige.com` (allow credentials).
+   Only the embedded Studio needs this — public pages never call Sanity from the browser.
 3. `npm run dev` and open `/admin`. Log in and start creating content.
 
 ### Content model
@@ -68,19 +68,22 @@ The app deploys as a Cloudflare Worker. The build stays ~1.2 MiB gzipped, within
 the free-tier 3 MiB limit.
 
 **Option A — Git-connected (recommended for handoff):** In the Cloudflare dashboard,
-*Workers & Pages → Create → Import a repository*. Set:
+*Workers & Pages → Create → Workers → Import a repository* → pick this repo. Set:
 
 - **Build command:** `npx opennextjs-cloudflare build`
 - **Deploy command:** `npx wrangler deploy`
-- **Environment variables:** add the same vars as `.env.local`.
+- **Environment variables:** none required — the Sanity project id/dataset/api
+  version are public and baked in as defaults (`src/sanity/env.ts`). Only add
+  build vars if pointing at a different project.
 
-Every push to `main` builds and deploys automatically.
+Every push to `main` builds and deploys automatically. The custom domain
+`feprestige.com` is attached automatically via the `routes` block in
+`wrangler.jsonc` (the zone is already in the account), so no manual DNS step is
+needed. `www` → apex, if wanted, is a separate Redirect Rule in the dashboard.
 
 **Option B — CLI:** `npm run deploy` (runs the OpenNext build and `wrangler deploy`).
-Run `npx wrangler login` first.
-
-Then add your custom domain to the Worker (*Settings → Domains & Routes*) and point
-the registered domain's DNS at Cloudflare.
+Run `npx wrangler login` first. Behind a corporate proxy, run it from a machine with
+open network (Node's fetch ignores `HTTPS_PROXY`; see `DEPLOYMENT.md`).
 
 Preview a production build locally with `npm run preview`.
 

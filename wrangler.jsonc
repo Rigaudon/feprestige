@@ -16,5 +16,9 @@
   ],
   "images": {
     "binding": "IMAGES"
-  }
+  },
+  // Attaches the custom domain on deploy. Requires the zone (feprestige.com) to
+  // live in the same Cloudflare account — it does, since the domain is registered
+  // there. Cloudflare provisions the DNS record + TLS cert automatically.
+  "routes": [{ "pattern": "feprestige.com", "custom_domain": true }]
 }

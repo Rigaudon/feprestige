@@ -8,10 +8,13 @@ export const apiVersion =
 export const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 
-// Empty when the project hasn't been connected yet. The data layer treats an
-// empty projectId as "not configured" and returns fallbacks so the site still
-// builds before Sanity is wired up. See sanity/client.ts.
-export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "";
+// Defaults to the FE Prestige project id — a public, non-secret identifier (it
+// ships in the browser bundle anyway). Baking it in means builds/deploys need no
+// env-var configuration; .env.local still overrides it for local dev or to point
+// at a different project. See sanity/client.ts.
+export const projectId =
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "k00wzpm0";
 
-// True once a real Sanity project id has been provided.
+// True whenever a project id is set (always true given the default above); kept
+// so the data layer can still short-circuit to fallbacks if it's ever blanked.
 export const isSanityConfigured = projectId.length > 0;
