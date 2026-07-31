@@ -4,6 +4,10 @@ import { useMemo, useState } from "react";
 
 import { formatNumber, formatRole, womPlayerUrl } from "@/wom/format";
 
+import { Pagination } from "./Pagination";
+
+const PAGE_SIZE = 25;
+
 export interface RosterMember {
   username: string;
   displayName: string;
@@ -32,6 +36,19 @@ const roleWeight = (role: string | null) =>
 export function RosterTable({ members }: { members: RosterMember[] }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("role");
+  const [page, setPage] = useState(0);
+
+  // Reset to the first page whenever the filter/sort changes (handled in the
+  // event handlers below rather than an effect). `safePage` also clamps if the
+  // result set shrinks under the current page.
+  const search = (value: string) => {
+    setQuery(value);
+    setPage(0);
+  };
+  const changeSort = (value: SortKey) => {
+    setSort(value);
+    setPage(0);
+  };
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -61,13 +78,17 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
     return sorted;
   }, [members, query, sort]);
 
+  const pageCount = Math.ceil(rows.length / PAGE_SIZE);
+  const safePage = Math.min(page, Math.max(0, pageCount - 1));
+  const visible = rows.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <input
           type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => search(e.target.value)}
           placeholder="Search members…"
           className="w-full max-w-xs rounded-lg border border-border bg-surface px-3 py-2 text-sm text-white placeholder:text-neutral-500 outline-none transition-colors focus:border-accent"
         />
@@ -75,7 +96,7 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
           Sort
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
+            onChange={(e) => changeSort(e.target.value as SortKey)}
             className="rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-white outline-none transition-colors hover:border-accent focus:border-accent"
           >
             <option value="role">Rank</option>
@@ -102,7 +123,7 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((m) => (
+            {visible.map((m) => (
               <tr
                 key={m.username}
                 className="border-b border-border/60 transition-colors last:border-0 hover:bg-surface/60"
@@ -139,6 +160,8 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={safePage} pageCount={pageCount} onPage={setPage} />
     </div>
   );
 }

@@ -17,6 +17,13 @@
   "images": {
     "binding": "IMAGES"
   },
+  // Persistent incremental-cache store for OpenNext (see open-next.config.ts).
+  // Prerendered ISR/SSG pages live here so they're served from cache instead of
+  // re-rendered (re-fetching WOM) on every request. Create once with:
+  //   npx wrangler r2 bucket create feprestige-cache
+  "r2_buckets": [
+    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "feprestige-cache" }
+  ],
   // Attaches the custom domain on deploy. Requires the zone (feprestige.com) to
   // live in the same Cloudflare account — it does, since the domain is registered
   // there. Cloudflare provisions the DNS record + TLS cert automatically.
