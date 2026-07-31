@@ -26,6 +26,16 @@ export const siteSettings = defineType({
       options: { hotspot: true },
     }),
     defineField({
+      name: "ogImage",
+      title: "Social preview image",
+      type: "image",
+      description:
+        "The image shown when the site is shared on Discord, Slack, iMessage, " +
+        "etc. Looks best as a wide banner (1200×630). Leave blank to fall back " +
+        "to the logo.",
+      options: { hotspot: true },
+    }),
+    defineField({
       name: "primaryCta",
       title: "Primary call-to-action",
       type: "object",
@@ -76,6 +86,24 @@ export const siteSettings = defineType({
         "Show the Roster / Hiscores / Gains tabs in the nav (requires a group " +
         "ID above). Turn off to hide them without removing the group ID.",
       initialValue: true,
+    }),
+    defineField({
+      name: "womContent",
+      title: "Wise Old Man tab headers",
+      type: "object",
+      description:
+        "Custom heading text for the Roster, Hiscores and Gains tabs. Leave " +
+        "any field blank to use the built-in default text.",
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({ name: "roster", title: "Roster", type: "womTabHeader" }),
+        defineField({
+          name: "hiscores",
+          title: "Hiscores",
+          type: "womTabHeader",
+        }),
+        defineField({ name: "gains", title: "Gains", type: "womTabHeader" }),
+      ],
     }),
   ],
   preview: {

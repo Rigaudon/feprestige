@@ -22,11 +22,23 @@ export interface Settings {
   title?: string;
   tagline?: string;
   logo?: SanityImageSource;
+  ogImage?: SanityImageSource;
   primaryCta?: { label?: string; url?: string };
   socialLinks?: { platform?: string; url?: string }[];
   footerText?: string;
   womGroupId?: number;
   showWomTabs?: boolean;
+  womContent?: {
+    roster?: WomTabHeader;
+    hiscores?: WomTabHeader;
+    gains?: WomTabHeader;
+  };
+}
+
+export interface WomTabHeader {
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
 }
 
 export interface NavItem {

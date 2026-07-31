@@ -4,7 +4,7 @@ import { RosterTable, type RosterMember } from "@/components/wom/RosterTable";
 import { WomEmptyState } from "@/components/wom/WomEmptyState";
 import { WomHeader } from "@/components/wom/WomHeader";
 import { getGroupDetails } from "@/wom/queries";
-import { getWomGroupId } from "@/wom/settings";
+import { getWomPageSettings } from "@/wom/settings";
 
 export const metadata: Metadata = {
   title: "Roster",
@@ -12,12 +12,13 @@ export const metadata: Metadata = {
 };
 
 export default async function RosterPage() {
-  const groupId = await getWomGroupId();
+  const { groupId, header } = await getWomPageSettings("roster");
+  const eyebrow = header.eyebrow ?? "Members";
 
   if (!groupId) {
     return (
       <>
-        <WomHeader eyebrow="Members" title="Roster" />
+        <WomHeader eyebrow={eyebrow} title={header.title ?? "Roster"} />
         <WomEmptyState
           title="Roster not configured"
           message="Add your Wise Old Man group ID in Site Settings to show the live clan roster here."
@@ -41,9 +42,10 @@ export default async function RosterPage() {
   return (
     <>
       <WomHeader
-        eyebrow="Members"
-        title={group?.name ? `${group.name} Roster` : "Roster"}
+        eyebrow={eyebrow}
+        title={header.title ?? (group?.name ? `${group.name} Roster` : "Roster")}
         subtitle={
+          header.subtitle ??
           group?.description ??
           "Our live member roster, synced from Wise Old Man."
         }

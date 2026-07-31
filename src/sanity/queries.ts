@@ -16,11 +16,17 @@ export const settingsQuery = defineQuery(`*[_type == "siteSettings"][0]{
   title,
   tagline,
   logo,
+  ogImage,
   primaryCta,
   socialLinks,
   footerText,
   womGroupId,
-  showWomTabs
+  showWomTabs,
+  womContent {
+    roster { eyebrow, title, subtitle },
+    hiscores { eyebrow, title, subtitle },
+    gains { eyebrow, title, subtitle }
+  }
 }`);
 
 // Nav items: pages flagged to show, ordered. Home is linked separately as "/".

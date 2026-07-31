@@ -31,6 +31,12 @@ export async function generateMetadata(): Promise<Metadata> {
     fallback: null,
   });
   const title = settings?.title || "FE Prestige";
+  const description = settings?.tagline || "Welcome to FE Prestige.";
+
+  // Canonical site URL. Discord/Slack/etc. require ABSOLUTE og:image URLs, so
+  // metadataBase resolves any relative ones. Overridable via env; defaults to
+  // the production domain (mirrors the baked-in default pattern in env.ts).
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://feprestige.com";
 
   // Favicon follows the Sanity logo (Site Settings) so editors control it with
   // the same upload that drives the sidebar. Falls back to the violet monogram
@@ -44,13 +50,49 @@ export async function generateMetadata(): Promise<Metadata> {
       ]
     : [{ url: "/icon.svg", type: "image/svg+xml" }];
 
+  // Open Graph image = the social link preview. A dedicated "Social preview
+  // image" (ogImage) wins, cropped to the 1200×630 banner Discord renders large.
+  // Otherwise fall back to the logo, scaled to fit (no crop) — it shows as a
+  // small thumbnail. Discord ignores the favicon, so without one of these the
+  // shared link stays a bare URL with no image.
+  const banner = settings?.ogImage;
+  const ogImages = banner
+    ? [
+        {
+          url: urlFor(banner).width(1200).height(630).fit("crop").format("png").url(),
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ]
+    : settings?.logo
+      ? [{ url: urlFor(settings.logo).width(1200).fit("max").format("png").url(), alt: title }]
+      : [];
+
   return {
+    metadataBase: new URL(siteUrl),
     title: {
       default: title,
       template: `%s · ${title}`,
     },
-    description: settings?.tagline || "Welcome to FE Prestige.",
+    description,
     icons: { icon, apple: icon },
+    openGraph: {
+      type: "website",
+      siteName: title,
+      title,
+      description,
+      url: siteUrl,
+      images: ogImages,
+    },
+    twitter: {
+      // A wide banner gets the large-image card; a square logo looks better in
+      // the compact card.
+      card: banner ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: ogImages.map((image) => image.url),
+    },
   };
 }
 

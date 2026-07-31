@@ -8,7 +8,7 @@ import {
   buildHiscoreLeaderboards,
 } from "@/wom/leaderboards";
 import { getGroupBulkHiscores } from "@/wom/queries";
-import { getWomGroupId } from "@/wom/settings";
+import { getWomPageSettings } from "@/wom/settings";
 
 export const metadata: Metadata = {
   title: "Hiscores",
@@ -16,12 +16,19 @@ export const metadata: Metadata = {
 };
 
 export default async function HiscoresPage() {
-  const groupId = await getWomGroupId();
+  const { groupId, header } = await getWomPageSettings("hiscores");
+
+  // Editor-controlled headings from Site Settings, falling back to defaults.
+  const eyebrow = header.eyebrow ?? "Leaderboards";
+  const title = header.title ?? "Hiscores";
+  const subtitle =
+    header.subtitle ??
+    "Where members rank across every skill, boss and activity. Pick a metric to see the top of the clan.";
 
   if (!groupId) {
     return (
       <>
-        <WomHeader eyebrow="Leaderboards" title="Hiscores" />
+        <WomHeader eyebrow={eyebrow} title={title} />
         <WomEmptyState
           title="Hiscores not configured"
           message="Add your Wise Old Man group ID in Site Settings to show clan hiscores here."
@@ -39,11 +46,7 @@ export default async function HiscoresPage() {
 
   return (
     <>
-      <WomHeader
-        eyebrow="Leaderboards"
-        title="Hiscores"
-        subtitle="Where members rank across every skill, boss and activity. Pick a metric to see the top of the clan."
-      />
+      <WomHeader eyebrow={eyebrow} title={title} subtitle={subtitle} />
       <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
         {metrics.length === 0 ? (
           <WomEmptyState

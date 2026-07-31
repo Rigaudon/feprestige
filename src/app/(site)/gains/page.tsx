@@ -8,7 +8,7 @@ import {
   buildGainLeaderboards,
 } from "@/wom/leaderboards";
 import { getBulkGroupGains } from "@/wom/queries";
-import { getWomGroupId } from "@/wom/settings";
+import { getWomPageSettings } from "@/wom/settings";
 
 export const metadata: Metadata = {
   title: "Gains",
@@ -16,12 +16,19 @@ export const metadata: Metadata = {
 };
 
 export default async function GainsPage() {
-  const groupId = await getWomGroupId();
+  const { groupId, header } = await getWomPageSettings("gains");
+
+  // Editor-controlled headings from Site Settings, falling back to defaults.
+  const eyebrow = header.eyebrow ?? "Leaderboards";
+  const title = header.title ?? "Top Gainers";
+  const subtitle =
+    header.subtitle ??
+    "Who's grinding hardest — XP, boss KC and more, this week and this month.";
 
   if (!groupId) {
     return (
       <>
-        <WomHeader eyebrow="Leaderboards" title="Gains" />
+        <WomHeader eyebrow={eyebrow} title={header.title ?? "Gains"} />
         <WomEmptyState
           title="Gains not configured"
           message="Add your Wise Old Man group ID in Site Settings to show top gainers here."
@@ -49,11 +56,7 @@ export default async function GainsPage() {
 
   return (
     <>
-      <WomHeader
-        eyebrow="Leaderboards"
-        title="Top Gainers"
-        subtitle="Who's grinding hardest — XP, boss KC and more, this week and this month."
-      />
+      <WomHeader eyebrow={eyebrow} title={title} subtitle={subtitle} />
       <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
         {!hasAny ? (
           <WomEmptyState
