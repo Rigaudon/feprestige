@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Chakra_Petch, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { sanityFetch } from "@/sanity/client";
@@ -14,6 +14,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Angular "tech" display face for headings and nav labels — the gaming accent.
+const chakraPetch = Chakra_Petch({
+  variable: "--font-display-family",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 // Title/description come from Sanity Site Settings so editors control them.
@@ -40,11 +47,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${chakraPetch.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        {children}
-      </body>
+      <body className="min-h-full text-neutral-100">{children}</body>
     </html>
   );
 }

@@ -34,15 +34,17 @@ const components: PortableTextComponents = {
   },
   block: {
     h2: ({ children }) => (
-      <h2 className="mt-10 mb-4 text-2xl font-bold tracking-tight">{children}</h2>
+      <h2 className="mt-10 mb-4 font-display text-2xl font-bold uppercase tracking-wide text-white">
+        {children}
+      </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 mb-3 text-xl font-semibold tracking-tight">
+      <h3 className="mt-8 mb-3 font-display text-xl font-semibold uppercase tracking-wide text-white">
         {children}
       </h3>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-4 border-indigo-500 pl-4 text-neutral-300 italic">
+      <blockquote className="my-6 border-l-4 border-accent pl-4 text-neutral-300 italic">
         {children}
       </blockquote>
     ),
@@ -69,7 +71,7 @@ const components: PortableTextComponents = {
       return (
         <a
           href={href}
-          className="text-indigo-400 underline underline-offset-2 hover:text-indigo-300"
+          className="text-accent-strong underline underline-offset-2 hover:text-accent-hot"
           {...(external
             ? { target: "_blank", rel: "noopener noreferrer" }
             : {})}

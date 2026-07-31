@@ -16,11 +16,16 @@ export default async function HomePage() {
   // Friendly empty state shown before any home page exists in the Studio.
   if (!page) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-24 text-center">
-        <h1 className="text-3xl font-bold">Welcome</h1>
+      <div className="mx-auto max-w-2xl px-6 py-24 text-center">
+        <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-accent-strong">
+          FE Prestige
+        </p>
+        <h1 className="font-display text-4xl font-bold uppercase tracking-tight text-white">
+          Welcome
+        </h1>
         <p className="mt-4 text-neutral-400">
           No home page yet. Open the{" "}
-          <Link href="/admin" className="text-indigo-400 underline">
+          <Link href="/admin" className="text-accent-strong underline">
             Studio
           </Link>{" "}
           and create a Page with “Use as home page” enabled.

@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
+/* ── FE Prestige theme ─────────────────────────────────────────────────────
+   Dark, violet-forward "gaming" look. Colors and fonts are exposed as theme
+   tokens so components can use utilities like `text-accent` / `font-display`.
+   The site is dark-only by design; there is no light mode. */
+
+@theme {
+  --color-bg: #0a0812;
+  --color-surface: #120d1f;
+  --color-surface-2: #1a1230;
+  --color-border: #2a1f45;
+
+  --color-accent: #a855f7; /* violet-500 */
+  --color-accent-strong: #c084fc; /* violet-400 */
+  --color-accent-hot: #ec4899; /* pink-500 */
+
+  --font-display: var(--font-display-family), var(--font-geist-sans), sans-serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg);
+  color: #ededed;
+  font-family: var(--font-sans);
+  /* Layered ambient glow + faint tech grid behind everything. */
+  background-image:
+    radial-gradient(
+      60rem 40rem at 100% -10%,
+      rgba(168, 85, 247, 0.14),
+      transparent 60%
+    ),
+    radial-gradient(
+      50rem 40rem at -10% 10%,
+      rgba(236, 72, 153, 0.08),
+      transparent 55%
+    ),
+    linear-gradient(rgba(168, 85, 247, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
+  background-attachment: fixed;
+}
+
+/* Utility: subtle animated glow used on the primary CTA and active nav. */
+@keyframes accent-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+  }
+  50% {
+    box-shadow: 0 0 24px -2px rgba(168, 85, 247, 0.55);
+  }
+}
+
+/* Thin, on-brand scrollbar for the sidebar / page. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }

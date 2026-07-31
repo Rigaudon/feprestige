@@ -1,11 +1,11 @@
-import { Footer } from "@/components/Footer";
-import { Nav } from "@/components/Nav";
+import { Sidebar } from "@/components/Sidebar";
 import { sanityFetch } from "@/sanity/client";
 import { navQuery, settingsQuery } from "@/sanity/queries";
 import type { NavItem, Settings } from "@/sanity/types";
 
-// Layout for the public site: nav + content + footer, all driven by Sanity.
-// The Studio at /admin lives in a separate route group and does not use this.
+// Layout for the public site: fixed left sidebar + content, all driven by
+// Sanity. The Studio at /admin lives in a separate route group and does not use
+// this. (There is no footer — socials + CTA moved into the sidebar.)
 export default async function SiteLayout({
   children,
 }: {
@@ -17,10 +17,9 @@ export default async function SiteLayout({
   ]);
 
   return (
-    <>
-      <Nav settings={settings} navItems={navItems} />
-      <main className="flex-1">{children}</main>
-      <Footer settings={settings} />
-    </>
+    <div className="min-h-screen lg:pl-64">
+      <Sidebar settings={settings} navItems={navItems} />
+      <main className="min-h-screen">{children}</main>
+    </div>
   );
 }
