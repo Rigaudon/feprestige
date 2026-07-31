@@ -7,8 +7,12 @@
     "build": "next build",
     "start": "next start -p 3333",
     "lint": "eslint",
+    "clean:fetch-cache": "node -e \"require('fs').rmSync('.next/cache/fetch-cache',{recursive:true,force:true})\"",
+    "prepreview": "npm run clean:fetch-cache",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "predeploy": "npm run clean:fetch-cache",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preupload": "npm run clean:fetch-cache",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "typegen": "sanity typegen generate"
