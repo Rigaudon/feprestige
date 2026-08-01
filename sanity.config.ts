@@ -12,6 +12,10 @@ export default defineConfig({
   projectId,
   dataset,
   schema,
+  // First-party Media Library: a searchable, taggable asset browser for reusing
+  // uploads (e.g. emojis dropped inline). Enabling it here makes it an asset
+  // source on every image field; the libraryId is auto-detected for the project.
+  mediaLibrary: { enabled: true },
   plugins: [
     structureTool(),
     visionTool({ defaultApiVersion: apiVersion }),

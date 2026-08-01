@@ -1,5 +1,7 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+import { CarouselCaptionsInput } from "@/sanity/components/CarouselCaptionsInput";
+
 // A swipeable image carousel for page bodies — built for the Clan Drops tab, where
 // members upload many tagged screenshots. Images are stored OLDEST-FIRST: the site
 // reverses them for display, so a new upload added at the bottom of the list shows up
@@ -17,6 +19,9 @@ export const carousel = defineType({
       description:
         "Add images here. The newest (last in this list) shows first in the carousel, so just add new drops to the bottom.",
       options: { layout: "grid" },
+      // Custom input adds an inline "quick caption editor" below the grid so
+      // captions can be edited all at once without opening each image.
+      components: { input: CarouselCaptionsInput },
       of: [
         defineArrayMember({
           type: "image",
@@ -27,7 +32,7 @@ export const carousel = defineType({
               title: "Caption",
               type: "string",
               description:
-                "Optional. e.g. 'Koty - Scythe of Vitur - 7/28/2026'. Leave blank if untagged.",
+                "Optional. e.g. 'Player - Scythe of Vitur - 7/28/2026'. Leave blank if untagged.",
             }),
             defineField({
               name: "alt",

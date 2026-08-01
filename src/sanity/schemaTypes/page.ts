@@ -63,7 +63,22 @@ export const page = defineType({
       title: "Body",
       type: "array",
       of: [
-        defineArrayMember({ type: "block" }),
+        defineArrayMember({
+          type: "block",
+          // Inline objects allowed within a line of text (e.g. a small emoji
+          // dropped mid-sentence). Distinct from the standalone image below.
+          of: [
+            defineArrayMember({
+              type: "image",
+              name: "inlineImage",
+              title: "Inline image (emoji-sized)",
+              options: { hotspot: false },
+              fields: [
+                defineField({ name: "alt", title: "Alt text", type: "string" }),
+              ],
+            }),
+          ],
+        }),
         defineArrayMember({
           type: "image",
           options: { hotspot: true },

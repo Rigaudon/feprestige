@@ -5,7 +5,7 @@ import {
 import type { PortableTextBlock } from "next-sanity";
 import Image from "next/image";
 
-import { urlFor } from "@/sanity/image";
+import { imageDimensions, urlFor } from "@/sanity/image";
 import type { Carousel as CarouselValue, ImageWithAlt, VideoEmbed } from "@/sanity/types";
 import { parseVideoUrl } from "@/sanity/video";
 
@@ -17,13 +17,22 @@ const components: PortableTextComponents = {
   types: {
     image: ({ value }: { value: ImageWithAlt }) => {
       if (!value?.asset?._ref) return null;
+      // Render at the image's natural size, capped at the column width — a small
+      // image stays small (centered) instead of being upscaled to full width.
+      const dim = imageDimensions(value);
+      const width = dim?.width ?? 1200;
+      const height = dim?.height ?? 800;
+      const requestWidth = Math.min(width, 1600);
       return (
-        <figure className="my-8">
+        <figure
+          className="my-8 mx-auto"
+          style={{ maxWidth: `${width}px` }}
+        >
           <Image
-            src={urlFor(value).width(1200).fit("max").auto("format").url()}
+            src={urlFor(value).width(requestWidth).fit("max").auto("format").url()}
             alt={value.alt || ""}
-            width={1200}
-            height={800}
+            width={width}
+            height={height}
             className="h-auto w-full rounded-lg"
           />
           {value.alt ? (
@@ -32,6 +41,21 @@ const components: PortableTextComponents = {
             </figcaption>
           ) : null}
         </figure>
+      );
+    },
+    inlineImage: ({ value }: { value: ImageWithAlt }) => {
+      if (!value?.asset?._ref) return null;
+      // Flows within the line of text at roughly the text height, like an emoji.
+      // A plain <img> is intentional here: next/image forces a block wrapper and
+      // fixed dimensions, which don't sit inline with text.
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={urlFor(value).height(72).fit("max").auto("format").url()}
+          alt={value.alt || ""}
+          className="inline-block h-[1.4em] w-auto align-text-bottom"
+          loading="lazy"
+        />
       );
     },
     carousel: ({ value }: { value: CarouselValue }) =>
