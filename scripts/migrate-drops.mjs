@@ -4,7 +4,9 @@
 // OLDEST-FIRST so the site's carousel (which reverses for display) shows newest first
 // and future uploads appended at the bottom land at the front.
 //
-// Run once, then you can delete this file:
+// Run once, then you can delete this file. Pass the token as an argument (cleanest on
+// Windows cmd.exe) or via env:
+//   node scripts/migrate-drops.mjs sk...
 //   SANITY_WRITE_TOKEN=sk... node scripts/migrate-drops.mjs
 //
 // The token needs Editor permission. Revoke it in manage.sanity.io afterward — the
@@ -24,10 +26,11 @@ if (proxy) {
   setGlobalDispatcher(new ProxyAgent(proxy));
 }
 
-const token = process.env.SANITY_WRITE_TOKEN;
+const token = process.argv[2] || process.env.SANITY_WRITE_TOKEN;
 if (!token) {
   console.error(
-    "Missing SANITY_WRITE_TOKEN. Run:\n  SANITY_WRITE_TOKEN=sk... node scripts/migrate-drops.mjs",
+    "Missing token. Run:\n  node scripts/migrate-drops.mjs sk...\n" +
+      "  (or set SANITY_WRITE_TOKEN in the environment)",
   );
   process.exit(1);
 }
