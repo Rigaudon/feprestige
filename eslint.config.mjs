@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".open-next/**",
     ".wrangler/**",
     "cloudflare-env.d.ts",
+    // One-off Node maintenance scripts (run with `node`, not part of the app).
+    "scripts/**",
   ]),
 ]);
 

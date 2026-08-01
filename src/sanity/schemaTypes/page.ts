@@ -72,6 +72,7 @@ export const page = defineType({
           ],
         }),
         defineArrayMember({ type: "videoEmbed" }),
+        defineArrayMember({ type: "carousel" }),
       ],
     }),
   ],

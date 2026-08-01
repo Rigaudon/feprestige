@@ -6,8 +6,10 @@ import type { PortableTextBlock } from "next-sanity";
 import Image from "next/image";
 
 import { urlFor } from "@/sanity/image";
-import type { ImageWithAlt, VideoEmbed } from "@/sanity/types";
+import type { Carousel as CarouselValue, ImageWithAlt, VideoEmbed } from "@/sanity/types";
 import { parseVideoUrl } from "@/sanity/video";
+
+import { Carousel } from "./Carousel";
 
 // Rendering rules for Portable Text. Editors write rich text + drop in images
 // in the Studio; this maps that structured content to styled HTML.
@@ -32,6 +34,12 @@ const components: PortableTextComponents = {
         </figure>
       );
     },
+    carousel: ({ value }: { value: CarouselValue }) =>
+      value?.images?.length ? (
+        <figure className="my-8">
+          <Carousel images={value.images} autoplay={value.autoplay} />
+        </figure>
+      ) : null,
     videoEmbed: ({ value }: { value: VideoEmbed }) => {
       const info = value?.url ? parseVideoUrl(value.url) : null;
       if (!info) return null;

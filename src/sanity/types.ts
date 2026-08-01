@@ -18,6 +18,17 @@ export interface VideoEmbed {
   caption?: string;
 }
 
+export interface CarouselImage extends ImageWithAlt {
+  _key?: string;
+  caption?: string;
+}
+
+export interface Carousel {
+  _type?: "carousel";
+  images?: CarouselImage[];
+  autoplay?: boolean;
+}
+
 export interface Settings {
   title?: string;
   tagline?: string;
