@@ -12,9 +12,10 @@ import { useSyncExternalStore } from "react";
 const THEMES = [
   { id: "dark", label: "Dark Violet", bg: "#0a0812", accent: "#a855f7", hot: "#ec4899" },
   { id: "light", label: "Light", bg: "#ffffff", accent: "#7c3aed", hot: "#db2777" },
-  { id: "emerald", label: "Emerald", bg: "#0a0812", accent: "#10b981", hot: "#2dd4bf" },
-  { id: "crimson", label: "Crimson", bg: "#0a0812", accent: "#ef4444", hot: "#fb923c" },
-  { id: "ocean", label: "Ocean", bg: "#0a0812", accent: "#0ea5e9", hot: "#22d3ee" },
+  { id: "emerald", label: "Emerald", bg: "#06110b", accent: "#10b981", hot: "#2dd4bf" },
+  { id: "crimson", label: "Crimson", bg: "#130607", accent: "#ef4444", hot: "#fb923c" },
+  { id: "ocean", label: "Ocean", bg: "#050f1b", accent: "#0ea5e9", hot: "#22d3ee" },
+  { id: "amber", label: "Amber", bg: "#140f04", accent: "#f59e0b", hot: "#f97316" },
 ] as const;
 
 type ThemeId = (typeof THEMES)[number]["id"];

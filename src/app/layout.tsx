@@ -113,7 +113,7 @@ export default function RootLayout({
             thing in <body>; kept in sync afterwards by ThemePicker. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme");var ok=["dark","light","emerald","crimson","ocean"];if(!t||ok.indexOf(t)===-1){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem("theme");var ok=["dark","light","emerald","crimson","ocean","amber"];if(!t||ok.indexOf(t)===-1){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
           }}
         />
         {children}

@@ -73,7 +73,7 @@ export function Sidebar({
           alt={brand}
           width={40}
           height={40}
-          className="h-10 w-10 rounded-lg ring-1 ring-border transition-all group-hover:ring-accent group-hover:brightness-110"
+          className="h-10 w-10 rounded-lg transition-all group-hover:brightness-110"
         />
       ) : (
         <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-hot font-display text-lg font-bold text-fg shadow-[0_0_20px_-4px_var(--color-accent)] transition-all group-hover:brightness-110 group-hover:shadow-[0_0_24px_-2px_var(--color-accent)]">
@@ -157,10 +157,21 @@ export function Sidebar({
     </div>
   );
 
+  // Accent-tinted vertical gradient layered over the rail's translucent surface
+  // (glow from the accent at the top, a touch of accent-hot at the bottom). Sits
+  // on top of the `bg-surface` base so the backdrop-blur glass still reads.
+  const railGradient = {
+    backgroundImage:
+      "linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 38%, transparent 82%, color-mix(in srgb, var(--color-accent-hot) 12%, transparent))",
+  };
+
   return (
     <>
       {/* Desktop rail — fixed, full height. */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-surface/60 backdrop-blur-xl lg:block">
+      <aside
+        style={railGradient}
+        className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-surface/60 backdrop-blur-xl lg:block"
+      >
         {inner}
       </aside>
 
@@ -206,6 +217,7 @@ export function Sidebar({
           }`}
         />
         <aside
+          style={railGradient}
           className={`absolute inset-y-0 left-0 w-72 max-w-[80%] border-r border-border bg-surface transition-transform duration-300 ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}

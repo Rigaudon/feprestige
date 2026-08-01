@@ -39,21 +39,47 @@
    accent trio; `light` swaps the whole palette. */
 
 :root[data-theme="emerald"] {
+  --color-bg: #06110b; /* deep forest */
+  --color-surface: #0c1c14;
+  --color-surface-2: #12291d;
+  --color-border: #1e3d2c;
+
   --color-accent: #10b981; /* emerald-500 */
   --color-accent-strong: #34d399; /* emerald-400 */
   --color-accent-hot: #2dd4bf; /* teal-400 */
 }
 
 :root[data-theme="crimson"] {
+  --color-bg: #130607; /* deep maroon */
+  --color-surface: #1f0c0d;
+  --color-surface-2: #2c1214;
+  --color-border: #482020;
+
   --color-accent: #ef4444; /* red-500 */
   --color-accent-strong: #f87171; /* red-400 */
   --color-accent-hot: #fb923c; /* orange-400 */
 }
 
 :root[data-theme="ocean"] {
+  --color-bg: #050f1b; /* deep navy */
+  --color-surface: #0a1826;
+  --color-surface-2: #0f2234;
+  --color-border: #1b3350;
+
   --color-accent: #0ea5e9; /* sky-500 */
   --color-accent-strong: #38bdf8; /* sky-400 */
   --color-accent-hot: #22d3ee; /* cyan-400 */
+}
+
+:root[data-theme="amber"] {
+  --color-bg: #140f04; /* dark warm */
+  --color-surface: #1e1608;
+  --color-surface-2: #2a1f0c;
+  --color-border: #453314;
+
+  --color-accent: #f59e0b; /* amber-500 */
+  --color-accent-strong: #fbbf24; /* amber-400 */
+  --color-accent-hot: #f97316; /* orange-500 */
 }
 
 :root[data-theme="light"] {
