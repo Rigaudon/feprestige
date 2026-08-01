@@ -44,11 +44,11 @@ export function HiscoresBoard({
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-fg-subtle">
           <span>Metric</span>
           <MetricSelect value={metric} onChange={selectMetric} metrics={metrics} />
         </div>
-        <span className="ml-auto font-mono text-xs uppercase tracking-wider text-neutral-500">
+        <span className="ml-auto font-mono text-xs uppercase tracking-wider text-fg-subtle">
           Top {entries.length}
         </span>
       </div>
@@ -63,7 +63,7 @@ export function HiscoresBoard({
             >
               <span
                 className={`w-8 shrink-0 text-center font-display text-sm font-bold tabular-nums ${
-                  rank <= 3 ? "text-accent-strong" : "text-neutral-500"
+                  rank <= 3 ? "text-accent-strong" : "text-fg-subtle"
                 }`}
               >
                 {rank}
@@ -72,7 +72,7 @@ export function HiscoresBoard({
                 href={womPlayerUrl(e.u)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 truncate font-display font-semibold text-white transition-colors hover:text-accent-strong"
+                className="flex-1 truncate font-display font-semibold text-fg transition-colors hover:text-accent-strong"
               >
                 {e.n}
                 {e.t ? (
@@ -80,11 +80,11 @@ export function HiscoresBoard({
                 ) : null}
               </a>
               {isSkill && e.l !== undefined ? (
-                <span className="hidden w-16 text-right font-mono text-xs uppercase tracking-wider text-neutral-500 sm:block">
+                <span className="hidden w-16 text-right font-mono text-xs uppercase tracking-wider text-fg-subtle sm:block">
                   Lv {e.l}
                 </span>
               ) : null}
-              <span className="w-28 text-right font-display font-semibold tabular-nums text-neutral-200">
+              <span className="w-28 text-right font-display font-semibold tabular-nums text-fg">
                 {formatMetricValue(metric, e.v)}
               </span>
             </li>
@@ -93,7 +93,7 @@ export function HiscoresBoard({
       </ol>
 
       {entries.length === 0 ? (
-        <p className="rounded-xl border border-border bg-surface px-4 py-8 text-center text-sm text-neutral-400">
+        <p className="rounded-xl border border-border bg-surface px-4 py-8 text-center text-sm text-fg-muted">
           No members are ranked in {metricName(metric)} yet.
         </p>
       ) : null}

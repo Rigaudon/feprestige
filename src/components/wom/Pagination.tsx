@@ -12,7 +12,7 @@ export function Pagination({
   if (pageCount <= 1) return null;
 
   const btn =
-    "rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-neutral-300 transition-all enabled:hover:border-accent enabled:hover:text-white enabled:active:scale-95 disabled:opacity-40";
+    "rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-fg-muted transition-all enabled:hover:border-accent enabled:hover:text-fg enabled:active:scale-95 disabled:opacity-40";
 
   return (
     <div className="mt-6 flex items-center justify-center gap-4">
@@ -24,7 +24,7 @@ export function Pagination({
       >
         ← Prev
       </button>
-      <span className="font-mono text-xs uppercase tracking-wider text-neutral-500">
+      <span className="font-mono text-xs uppercase tracking-wider text-fg-subtle">
         Page {page + 1} of {pageCount}
       </span>
       <button

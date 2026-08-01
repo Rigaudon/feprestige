@@ -60,7 +60,7 @@ export function GainsBoard({
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-fg-subtle">
           <span>Metric</span>
           <MetricSelect
             value={metric}
@@ -77,8 +77,8 @@ export function GainsBoard({
               onClick={() => selectPeriod(p.key)}
               className={`px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide transition-all active:scale-95 ${
                 period === p.key
-                  ? "bg-surface-2 text-white"
-                  : "bg-surface text-neutral-400 hover:text-white"
+                  ? "bg-surface-2 text-fg"
+                  : "bg-surface text-fg-muted hover:text-fg"
               }`}
             >
               {p.label}
@@ -86,13 +86,13 @@ export function GainsBoard({
           ))}
         </div>
 
-        <span className="ml-auto font-mono text-xs uppercase tracking-wider text-neutral-500">
+        <span className="ml-auto font-mono text-xs uppercase tracking-wider text-fg-subtle">
           Top {entries.length}
         </span>
       </div>
 
       {entries.length === 0 ? (
-        <p className="rounded-xl border border-border bg-surface px-4 py-8 text-center text-sm text-neutral-400">
+        <p className="rounded-xl border border-border bg-surface px-4 py-8 text-center text-sm text-fg-muted">
           No {metricName(metric)} gains recorded{" "}
           {period === "week" ? "this week" : "this month"} yet.
         </p>
@@ -108,7 +108,7 @@ export function GainsBoard({
                 >
                   <span
                     className={`w-8 shrink-0 text-center font-display text-sm font-bold tabular-nums ${
-                      rank <= 3 ? "text-accent-strong" : "text-neutral-500"
+                      rank <= 3 ? "text-accent-strong" : "text-fg-subtle"
                     }`}
                   >
                     {rank}
@@ -117,7 +117,7 @@ export function GainsBoard({
                     href={womPlayerUrl(e.u)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 truncate font-display font-semibold text-white transition-colors hover:text-accent-strong"
+                    className="flex-1 truncate font-display font-semibold text-fg transition-colors hover:text-accent-strong"
                   >
                     {e.n}
                     {e.t ? (

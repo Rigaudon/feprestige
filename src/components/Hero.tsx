@@ -38,11 +38,11 @@ export function Hero({
           <span className="inline-block h-px w-8 bg-gradient-to-r from-accent to-transparent" />
           FE Prestige
         </p>
-        <h1 className="font-display text-4xl font-bold uppercase leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_20px_rgba(168,85,247,0.35)] sm:text-6xl">
+        <h1 className="font-display text-4xl font-bold uppercase leading-[1.05] tracking-tight text-fg drop-shadow-[0_2px_20px_rgba(168,85,247,0.35)] sm:text-6xl">
           {title}
         </h1>
         {subtitle ? (
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-neutral-300">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-muted">
             {subtitle}
           </p>
         ) : null}

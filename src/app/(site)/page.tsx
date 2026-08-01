@@ -20,10 +20,10 @@ export default async function HomePage() {
         <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-accent-strong">
           FE Prestige
         </p>
-        <h1 className="font-display text-4xl font-bold uppercase tracking-tight text-white">
+        <h1 className="font-display text-4xl font-bold uppercase tracking-tight text-fg">
           Welcome
         </h1>
-        <p className="mt-4 text-neutral-400">
+        <p className="mt-4 text-fg-muted">
           No home page yet. Open the{" "}
           <Link href="/admin" className="text-accent-strong underline">
             Studio
@@ -42,7 +42,7 @@ export default async function HomePage() {
         image={page.heroImage}
       />
       {page.body?.length ? (
-        <article className="mx-auto max-w-3xl px-4 py-12">
+        <article className="mx-auto max-w-5xl px-4 py-12">
           <PortableText value={page.body} />
         </article>
       ) : null}

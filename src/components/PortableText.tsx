@@ -36,7 +36,7 @@ const components: PortableTextComponents = {
             className="h-auto w-full rounded-lg"
           />
           {value.alt ? (
-            <figcaption className="mt-2 text-center text-sm text-neutral-400">
+            <figcaption className="mt-2 text-center text-sm text-fg-muted">
               {value.alt}
             </figcaption>
           ) : null}
@@ -80,7 +80,7 @@ const components: PortableTextComponents = {
             />
           </div>
           {value.caption ? (
-            <figcaption className="mt-2 text-center text-sm text-neutral-400">
+            <figcaption className="mt-2 text-center text-sm text-fg-muted">
               {value.caption}
             </figcaption>
           ) : null}
@@ -88,34 +88,38 @@ const components: PortableTextComponents = {
       );
     },
   },
+  // The article container is wide (max-w-5xl) so media can grow on large
+  // screens; keep the text itself at a readable measure (max-w-3xl, centered).
   block: {
     h2: ({ children }) => (
-      <h2 className="mt-10 mb-4 font-display text-2xl font-bold uppercase tracking-wide text-white">
+      <h2 className="mx-auto mt-10 mb-4 max-w-3xl font-display text-2xl font-bold uppercase tracking-wide text-fg">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 mb-3 font-display text-xl font-semibold uppercase tracking-wide text-white">
+      <h3 className="mx-auto mt-8 mb-3 max-w-3xl font-display text-xl font-semibold uppercase tracking-wide text-fg">
         {children}
       </h3>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-4 border-accent pl-4 text-neutral-300 italic">
+      <blockquote className="mx-auto my-6 max-w-3xl border-l-4 border-accent pl-4 text-fg-muted italic">
         {children}
       </blockquote>
     ),
     normal: ({ children }) => (
-      <p className="my-4 leading-7 text-neutral-300">{children}</p>
+      <p className="mx-auto my-4 max-w-3xl leading-7 text-fg-muted">
+        {children}
+      </p>
     ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="my-4 list-disc space-y-2 pl-6 text-neutral-300">
+      <ul className="mx-auto my-4 max-w-3xl list-disc space-y-2 pl-6 text-fg-muted">
         {children}
       </ul>
     ),
     number: ({ children }) => (
-      <ol className="my-4 list-decimal space-y-2 pl-6 text-neutral-300">
+      <ol className="mx-auto my-4 max-w-3xl list-decimal space-y-2 pl-6 text-fg-muted">
         {children}
       </ol>
     ),
@@ -137,7 +141,7 @@ const components: PortableTextComponents = {
       );
     },
     strong: ({ children }) => (
-      <strong className="font-semibold text-neutral-100">{children}</strong>
+      <strong className="font-semibold text-fg">{children}</strong>
     ),
   },
 };

@@ -160,15 +160,15 @@ export function Carousel({
               className="relative block aspect-video w-full bg-black/40"
             >
               <Image
-                src={urlFor(img).width(1200).fit("max").auto("format").url()}
+                src={urlFor(img).width(1600).fit("max").auto("format").url()}
                 alt={img.alt || img.caption || ""}
                 fill
-                sizes="(max-width: 768px) 100vw, 768px"
+                sizes="(max-width: 1024px) 100vw, 1024px"
                 className="object-contain"
               />
             </button>
             {img.caption ? (
-              <p className="px-4 py-2 text-center text-sm text-neutral-400">
+              <p className="px-4 py-2 text-center text-sm text-fg-muted">
                 {img.caption}
               </p>
             ) : null}
@@ -183,7 +183,7 @@ export function Carousel({
             type="button"
             onClick={() => go(current - 1)}
             aria-label="Previous image"
-            className="absolute top-1/2 left-2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-lg text-white backdrop-blur transition-colors hover:border-accent hover:text-accent-strong"
+            className="absolute top-1/2 left-2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-lg text-fg backdrop-blur transition-colors hover:border-accent hover:text-accent-strong"
           >
             &#8249;
           </button>
@@ -191,7 +191,7 @@ export function Carousel({
             type="button"
             onClick={() => go(current + 1)}
             aria-label="Next image"
-            className="absolute top-1/2 right-2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-lg text-white backdrop-blur transition-colors hover:border-accent hover:text-accent-strong"
+            className="absolute top-1/2 right-2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-lg text-fg backdrop-blur transition-colors hover:border-accent hover:text-accent-strong"
           >
             &#8250;
           </button>
@@ -232,7 +232,7 @@ export function Carousel({
             type="button"
             onClick={() => setLightbox(null)}
             aria-label="Close"
-            className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full border border-border bg-surface/80 text-xl text-white hover:border-accent hover:text-accent-strong"
+            className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full border border-border bg-surface/80 text-xl text-fg hover:border-accent hover:text-accent-strong"
           >
             &times;
           </button>
@@ -256,7 +256,7 @@ export function Carousel({
           </div>
 
           {slides[lightbox].caption ? (
-            <p className="mt-3 text-center text-sm text-neutral-300">
+            <p className="mt-3 text-center text-sm text-fg-muted">
               {slides[lightbox].caption}
             </p>
           ) : null}
@@ -270,7 +270,7 @@ export function Carousel({
                   setLightbox((i) => (i === null ? i : (i - 1 + count) % count));
                 }}
                 aria-label="Previous image"
-                className="absolute top-1/2 left-4 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-2xl text-white hover:border-accent hover:text-accent-strong"
+                className="absolute top-1/2 left-4 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-2xl text-fg hover:border-accent hover:text-accent-strong"
               >
                 &#8249;
               </button>
@@ -281,7 +281,7 @@ export function Carousel({
                   setLightbox((i) => (i === null ? i : (i + 1) % count));
                 }}
                 aria-label="Next image"
-                className="absolute top-1/2 right-4 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-2xl text-white hover:border-accent hover:text-accent-strong"
+                className="absolute top-1/2 right-4 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface/80 text-2xl text-fg hover:border-accent hover:text-accent-strong"
               >
                 &#8250;
               </button>

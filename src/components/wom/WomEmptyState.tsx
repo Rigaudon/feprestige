@@ -14,13 +14,13 @@ export function WomEmptyState({
       <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-accent-strong">
         Wise Old Man
       </p>
-      <h2 className="font-display text-3xl font-bold uppercase tracking-tight text-white">
+      <h2 className="font-display text-3xl font-bold uppercase tracking-tight text-fg">
         {title}
       </h2>
-      <p className="mt-4 text-neutral-400">{message}</p>
+      <p className="mt-4 text-fg-muted">{message}</p>
       <Link
         href="/admin"
-        className="mt-8 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent-strong transition-colors hover:border-accent hover:text-white"
+        className="mt-8 inline-flex items-center rounded-lg border border-border bg-surface px-4 py-2 font-display text-sm font-semibold uppercase tracking-wide text-accent-strong transition-colors hover:border-accent hover:text-fg"
       >
         Open the Studio
       </Link>

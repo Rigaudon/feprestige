@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
-/* ── FE Prestige theme ─────────────────────────────────────────────────────
-   Dark, violet-forward "gaming" look. Colors and fonts are exposed as theme
-   tokens so components can use utilities like `text-accent` / `font-display`.
-   The site is dark-only by design; there is no light mode. */
+/* ── FE Prestige themes ────────────────────────────────────────────────────
+   Colors and fonts are exposed as theme tokens so components use semantic
+   utilities like `text-fg` / `text-accent` / `font-display` — never hardcoded
+   greys. The @theme values below are the default DARK VIOLET theme (also what
+   renders with no JS). Other themes override these `--color-*` vars via
+   `:root[data-theme="…"]` blocks further down; the picker sets `data-theme` on
+   <html>. Foreground tokens (`fg`, `fg-muted`, `fg-subtle`) are what make a real
+   light mode possible. */
 
 @theme {
   --color-bg: #0a0812;
@@ -15,6 +19,11 @@
   --color-accent-strong: #c084fc; /* violet-400 */
   --color-accent-hot: #ec4899; /* pink-500 */
 
+  /* Foreground / text ramp (strong → subtle). */
+  --color-fg: #f5f3ff;
+  --color-fg-muted: #b6adc9;
+  --color-fg-subtle: #6f6880;
+
   --font-display: var(--font-display-family), var(--font-geist-sans), sans-serif;
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
@@ -22,6 +31,46 @@
 
 :root {
   color-scheme: dark;
+}
+
+/* ── Alternate themes ──────────────────────────────────────────────────────
+   `:root[data-theme]` outspecifies the `@theme` `:root` above, so these win.
+   The dark accent variants keep the dark background/foreground and only swap the
+   accent trio; `light` swaps the whole palette. */
+
+:root[data-theme="emerald"] {
+  --color-accent: #10b981; /* emerald-500 */
+  --color-accent-strong: #34d399; /* emerald-400 */
+  --color-accent-hot: #2dd4bf; /* teal-400 */
+}
+
+:root[data-theme="crimson"] {
+  --color-accent: #ef4444; /* red-500 */
+  --color-accent-strong: #f87171; /* red-400 */
+  --color-accent-hot: #fb923c; /* orange-400 */
+}
+
+:root[data-theme="ocean"] {
+  --color-accent: #0ea5e9; /* sky-500 */
+  --color-accent-strong: #38bdf8; /* sky-400 */
+  --color-accent-hot: #22d3ee; /* cyan-400 */
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: #f7f5fc;
+  --color-surface: #ffffff;
+  --color-surface-2: #f0eafa;
+  --color-border: #e0d7f0;
+
+  --color-accent: #7c3aed; /* violet-600 */
+  --color-accent-strong: #6d28d9; /* violet-700 */
+  --color-accent-hot: #db2777; /* pink-600 */
+
+  --color-fg: #1b1526;
+  --color-fg-muted: #4c455c;
+  --color-fg-subtle: #7a7288;
 }
 
 /* ── Interaction foundation ────────────────────────────────────────────────
@@ -35,7 +84,7 @@
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 2px;
-  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.25);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
 :focus:not(:focus-visible) {
   outline: none;
@@ -61,22 +110,30 @@ button:not(:disabled),
 
 body {
   background-color: var(--color-bg);
-  color: #ededed;
+  color: var(--color-fg);
   font-family: var(--font-sans);
-  /* Layered ambient glow + faint tech grid behind everything. */
+  /* Layered ambient glow + faint tech grid behind everything. Tinted from the
+     active accent so it follows the theme. */
   background-image:
     radial-gradient(
       60rem 40rem at 100% -10%,
-      rgba(168, 85, 247, 0.14),
+      color-mix(in srgb, var(--color-accent) 14%, transparent),
       transparent 60%
     ),
     radial-gradient(
       50rem 40rem at -10% 10%,
-      rgba(236, 72, 153, 0.08),
+      color-mix(in srgb, var(--color-accent-hot) 8%, transparent),
       transparent 55%
     ),
-    linear-gradient(rgba(168, 85, 247, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(168, 85, 247, 0.035) 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--color-accent) 4%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-accent) 4%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px;
   background-attachment: fixed;
 }
@@ -85,10 +142,10 @@ body {
 @keyframes accent-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+    box-shadow: 0 0 0 0 transparent;
   }
   50% {
-    box-shadow: 0 0 24px -2px rgba(168, 85, 247, 0.55);
+    box-shadow: 0 0 24px -2px color-mix(in srgb, var(--color-accent) 55%, transparent);
   }
 }
 

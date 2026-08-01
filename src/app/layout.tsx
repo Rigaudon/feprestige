@@ -104,9 +104,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${chakraPetch.variable} h-full antialiased`}
     >
-      <body className="min-h-full text-neutral-100">{children}</body>
+      <body className="min-h-full text-fg">
+        {/* Set the theme before first paint to avoid a flash: use the saved
+            choice, else match the OS light/dark preference. Runs as the first
+            thing in <body>; kept in sync afterwards by ThemePicker. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");var ok=["dark","light","emerald","crimson","ocean"];if(!t||ok.indexOf(t)===-1){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

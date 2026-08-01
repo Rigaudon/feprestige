@@ -52,7 +52,7 @@ export default async function Page({
     <>
       <Hero title={page.title} subtitle={page.subtitle} image={page.heroImage} />
       {page.body?.length ? (
-        <article className="mx-auto max-w-3xl px-4 py-12">
+        <article className="mx-auto max-w-5xl px-4 py-12">
           <PortableText value={page.body} />
         </article>
       ) : null}

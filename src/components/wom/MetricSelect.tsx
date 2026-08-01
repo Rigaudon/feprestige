@@ -63,14 +63,14 @@ export function MetricSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex min-w-44 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-white outline-none transition-all hover:border-accent focus:border-accent active:scale-[0.98]"
+        className="flex min-w-44 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-fg outline-none transition-all hover:border-accent focus:border-accent active:scale-[0.98]"
       >
         <MetricIcon metric={value} size={18} />
         <span className="truncate">{metricName(value)}</span>
         <svg
           viewBox="0 0 20 20"
           fill="currentColor"
-          className={`ml-auto h-4 w-4 shrink-0 text-neutral-500 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`ml-auto h-4 w-4 shrink-0 text-fg-subtle transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         >
           <path
@@ -91,7 +91,7 @@ export function MetricSelect({
             if (options.length === 0) return null;
             return (
               <div key={type}>
-                <div className="px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+                <div className="px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-fg-subtle">
                   {label}
                 </div>
                 {options.map((m) => {
@@ -106,7 +106,7 @@ export function MetricSelect({
                       className={`flex w-full items-center gap-2 px-3 py-2 text-left font-display text-sm font-semibold tracking-wide transition-colors ${
                         selected
                           ? "bg-surface text-accent-strong"
-                          : "text-neutral-200 hover:bg-surface"
+                          : "text-fg hover:bg-surface"
                       }`}
                     >
                       <MetricIcon metric={m} size={18} />

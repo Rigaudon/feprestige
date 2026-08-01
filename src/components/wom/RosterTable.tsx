@@ -106,14 +106,14 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
           value={query}
           onChange={(e) => search(e.target.value)}
           placeholder="Search members…"
-          className="w-full max-w-xs rounded-lg border border-border bg-surface px-3 py-2 text-sm text-white placeholder:text-neutral-500 outline-none transition-colors focus:border-accent"
+          className="w-full max-w-xs rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-subtle outline-none transition-colors focus:border-accent"
         />
-        <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-neutral-500">
+        <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-fg-subtle">
           Sort
           <select
             value={sort}
             onChange={(e) => changeSort(e.target.value as SortKey)}
-            className="rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-white outline-none transition-colors hover:border-accent focus:border-accent"
+            className="rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-fg outline-none transition-colors hover:border-accent focus:border-accent"
           >
             <option value="role">Rank</option>
             <option value="name">Name</option>
@@ -122,7 +122,7 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
             <option value="ehb">EHB</option>
           </select>
         </label>
-        <span className="ml-auto font-mono text-xs uppercase tracking-wider text-neutral-500">
+        <span className="ml-auto font-mono text-xs uppercase tracking-wider text-fg-subtle">
           {rows.length} {rows.length === 1 ? "member" : "members"}
         </span>
       </div>
@@ -130,7 +130,7 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-border bg-surface text-left font-mono text-[11px] uppercase tracking-wider text-neutral-500">
+            <tr className="border-b border-border bg-surface text-left font-mono text-[11px] uppercase tracking-wider text-fg-subtle">
               <th className="px-4 py-3 font-medium">Member</th>
               <th className="px-4 py-3 font-medium">Rank</th>
               <th className="px-4 py-3 text-right font-medium">Total XP</th>
@@ -149,25 +149,25 @@ export function RosterTable({ members }: { members: RosterMember[] }) {
                     href={womPlayerUrl(m.username)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-display font-semibold text-white transition-colors hover:text-accent-strong"
+                    className="font-display font-semibold text-fg transition-colors hover:text-accent-strong"
                   >
                     {m.displayName}
                   </a>
                   <PlayerTypeIcon type={m.type} className="ml-2 align-[-0.1em]" />
                 </td>
-                <td className="px-4 py-3 text-neutral-300">
+                <td className="px-4 py-3 text-fg-muted">
                   <span className="flex items-center gap-2">
                     <GroupRoleIcon role={m.role} />
                     {formatRole(m.role)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-neutral-300">
+                <td className="px-4 py-3 text-right tabular-nums text-fg-muted">
                   {formatNumber(m.exp)}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-neutral-300">
+                <td className="px-4 py-3 text-right tabular-nums text-fg-muted">
                   {m.ehp.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-neutral-300">
+                <td className="px-4 py-3 text-right tabular-nums text-fg-muted">
                   {m.ehb.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                 </td>
               </tr>

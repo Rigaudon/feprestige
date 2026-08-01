@@ -8,6 +8,8 @@ import { useState } from "react";
 import { urlFor } from "@/sanity/image";
 import type { NavItem, Settings } from "@/sanity/types";
 
+import { ThemePicker } from "./ThemePicker";
+
 // Left sidebar navigation (replaces the old top nav + footer). Holds the brand,
 // the page tabs with an active-state highlight, and the socials + primary CTA
 // that used to live in the footer. On small screens it collapses to a top bar
@@ -42,8 +44,8 @@ export function Sidebar({
       onClick={close}
       className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-display text-sm font-semibold uppercase tracking-wide transition-all ${
         active
-          ? "bg-surface-2 text-white"
-          : "text-neutral-400 hover:bg-surface hover:text-white"
+          ? "bg-surface-2 text-fg"
+          : "text-fg-muted hover:bg-surface hover:text-fg"
       }`}
     >
       {/* Neon spine on the active / hovered item. */}
@@ -56,7 +58,7 @@ export function Sidebar({
         className={`h-1.5 w-1.5 rounded-full transition-colors ${
           active
             ? "bg-accent shadow-[0_0_8px_1px_var(--color-accent)]"
-            : "bg-neutral-600 group-hover:bg-accent"
+            : "bg-fg-subtle group-hover:bg-accent"
         }`}
       />
       {label}
@@ -74,11 +76,11 @@ export function Sidebar({
           className="h-10 w-10 rounded-lg ring-1 ring-border transition-all group-hover:ring-accent group-hover:brightness-110"
         />
       ) : (
-        <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-hot font-display text-lg font-bold text-white shadow-[0_0_20px_-4px_var(--color-accent)] transition-all group-hover:brightness-110 group-hover:shadow-[0_0_24px_-2px_var(--color-accent)]">
+        <span className="grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-hot font-display text-lg font-bold text-fg shadow-[0_0_20px_-4px_var(--color-accent)] transition-all group-hover:brightness-110 group-hover:shadow-[0_0_24px_-2px_var(--color-accent)]">
           {brand.charAt(0).toUpperCase()}
         </span>
       )}
-      <span className="font-display text-lg font-bold uppercase tracking-wider text-white transition-colors group-hover:text-accent-strong">
+      <span className="font-display text-lg font-bold uppercase tracking-wider text-fg transition-colors group-hover:text-accent-strong">
         {brand}
       </span>
     </Link>
@@ -107,7 +109,7 @@ export function Sidebar({
 
         {extraNav.length > 0 ? (
           <>
-            <p className="mt-4 px-3 pb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-600">
+            <p className="mt-4 px-3 pb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-fg-subtle">
               Clan Stats
             </p>
             {extraNav.map((item) =>
@@ -128,7 +130,7 @@ export function Sidebar({
             href={cta.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-lg bg-gradient-to-r from-accent to-accent-hot px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-white shadow-[0_0_20px_-6px_var(--color-accent)] transition-all hover:shadow-[0_0_28px_-4px_var(--color-accent-hot)] hover:brightness-110 active:scale-[0.98] active:brightness-95"
+            className="flex items-center justify-center rounded-lg bg-gradient-to-r from-accent to-accent-hot px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-fg shadow-[0_0_20px_-6px_var(--color-accent)] transition-all hover:shadow-[0_0_28px_-4px_var(--color-accent-hot)] hover:brightness-110 active:scale-[0.98] active:brightness-95"
           >
             {cta.label}
           </a>
@@ -142,13 +144,15 @@ export function Sidebar({
                 href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-neutral-400 transition-all hover:border-accent hover:text-accent-strong active:scale-95"
+                className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-fg-muted transition-all hover:border-accent hover:text-accent-strong active:scale-95"
               >
                 {s.platform}
               </a>
             ))}
           </div>
         ) : null}
+
+        <ThemePicker />
       </div>
     </div>
   );
@@ -168,7 +172,7 @@ export function Sidebar({
           aria-label="Toggle navigation"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="grid h-10 w-10 place-items-center rounded-lg border border-border text-neutral-300 transition-all hover:border-accent hover:text-accent-strong active:scale-95"
+          className="grid h-10 w-10 place-items-center rounded-lg border border-border text-fg-muted transition-all hover:border-accent hover:text-accent-strong active:scale-95"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
             {open ? (
