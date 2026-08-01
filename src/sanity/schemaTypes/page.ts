@@ -1,4 +1,12 @@
-import { defineArrayMember, defineField, defineType } from "sanity";
+import type { ComponentType } from "react";
+import {
+  type ArrayOfPrimitivesInputProps,
+  defineArrayMember,
+  defineField,
+  defineType,
+} from "sanity";
+
+import { BodyPasteImageInput } from "@/sanity/components/BodyPasteImageInput";
 
 // A page = one tab on the site. Editors control the nav entirely from here:
 // toggle "Show in navigation" and set the order. Flag exactly one page as the
@@ -62,6 +70,13 @@ export const page = defineType({
       name: "body",
       title: "Body",
       type: "array",
+      // Custom input adds paste-to-inline-image: paste a copied image (e.g. a
+      // Discord emoji) straight into the text and it uploads + inserts inline.
+      // Sanity infers this array's input as primitives, but at runtime it is the
+      // Portable Text editor, so the component receives PortableTextInputProps.
+      components: {
+        input: BodyPasteImageInput as unknown as ComponentType<ArrayOfPrimitivesInputProps>,
+      },
       of: [
         defineArrayMember({
           type: "block",
