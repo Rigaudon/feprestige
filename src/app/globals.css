@@ -25,8 +25,18 @@
   --color-fg-subtle: #6f6880;
 
   --font-display: var(--font-display-family), var(--font-geist-sans), sans-serif;
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-sans: var(--font-display-family), var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
+
+  /* The RuneScape pixel face packs glyphs tightly, so the whole tracking scale
+     is shifted positive — even `tracking-tight` (hero/page titles) now has real
+     spacing. Retunes every `tracking-*` utility site-wide from one place. */
+  --tracking-tighter: 0.02em;
+  --tracking-tight: 0.04em;
+  --tracking-normal: 0.05em;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.1em;
+  --tracking-widest: 0.16em;
 }
 
 :root {
@@ -82,21 +92,38 @@
   --color-accent-hot: #f97316; /* orange-500 */
 }
 
-:root[data-theme="light"] {
-  color-scheme: light;
+:root[data-theme="gold"] {
+  /* Flat high-contrast: soft gold (#fceb4f) on pure black. No glow (see overrides). */
+  --color-bg: #000000;
+  --color-surface: #0d0d0d;
+  --color-surface-2: #1a1a1a;
+  --color-border: #3d3d00;
 
-  --color-bg: #f7f5fc;
-  --color-surface: #ffffff;
-  --color-surface-2: #f0eafa;
-  --color-border: #e0d7f0;
+  --color-accent: #fceb4f; /* rgb(252, 235, 79) */
+  --color-accent-strong: #fceb4f;
+  --color-accent-hot: #fceb4f;
 
-  --color-accent: #7c3aed; /* violet-600 */
-  --color-accent-strong: #6d28d9; /* violet-700 */
-  --color-accent-hot: #db2777; /* pink-600 */
+  --color-fg: #fceb4f; /* soft gold text */
+  --color-fg-muted: #cabc3f; /* dimmer */
+  --color-fg-subtle: #7e7628; /* faintest labels */
+}
 
-  --color-fg: #1b1526;
-  --color-fg-muted: #4c455c;
-  --color-fg-subtle: #7a7288;
+/* Gold theme is deliberately flat — strip the ambient glow so the backdrop is
+   straight black, kill the nav's accent gradient + box-shadow glows, and put
+   black text on the yellow CTA. Scoped to `[data-theme="gold"]` so other themes
+   keep their glow. The `aside` gradient is an inline style, hence `!important`. */
+:root[data-theme="gold"] body {
+  background-image: none;
+}
+:root[data-theme="gold"] aside {
+  background-image: none !important;
+}
+:root[data-theme="gold"] aside [class*="shadow-"],
+:root[data-theme="gold"] header [class*="shadow-"] {
+  box-shadow: none !important;
+}
+:root[data-theme="gold"] [data-site-cta] {
+  color: #000000;
 }
 
 /* ── Interaction foundation ────────────────────────────────────────────────
@@ -134,10 +161,25 @@ button:not(:disabled),
   }
 }
 
+/* Global scale-up: every Tailwind `text-*` and spacing value is in rem, so
+   nudging the root font-size enlarges the whole UI proportionally — headings,
+   nav, buttons, tables, and padding all grow together. Tune this one number to
+   scale the entire site. */
+html {
+  font-size: 112.5%; /* 18px base (default 16px) */
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
+  /* Bump the base size a touch — the RuneScape pixel face reads small, so
+     default/unstyled text (paragraphs, lists) gets a little extra. Elements
+     with an explicit `text-*` utility (headings, small labels) are unaffected. */
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.6;
+  /* The pixel face packs glyphs tightly; a little tracking makes it breathe. */
+  letter-spacing: 0.05em;
   /* Layered ambient glow + faint tech grid behind everything. Tinted from the
      active accent so it follows the theme. */
   background-image:

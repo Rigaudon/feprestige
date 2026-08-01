@@ -5,13 +5,14 @@ import { useSyncExternalStore } from "react";
 // Visitor-facing theme picker. Themes are driven entirely by the `data-theme`
 // attribute on <html> (see src/app/globals.css); this just sets that attribute
 // and remembers the choice in localStorage. The pre-paint script in the root
-// layout applies the saved/system theme before React mounts, so there's no flash.
+// layout applies the saved theme (default: dark) before React mounts, so there's
+// no flash.
 //
 // Swatch colors are hardcoded here (not CSS vars) so every swatch previews its
 // OWN theme rather than the currently-active one. Keep in sync with globals.css.
 const THEMES = [
   { id: "dark", label: "Dark Violet", bg: "#0a0812", accent: "#a855f7", hot: "#ec4899" },
-  { id: "light", label: "Light", bg: "#ffffff", accent: "#7c3aed", hot: "#db2777" },
+  { id: "gold", label: "Gold", bg: "#000000", accent: "#fceb4f", hot: "#fceb4f" },
   { id: "emerald", label: "Emerald", bg: "#06110b", accent: "#10b981", hot: "#2dd4bf" },
   { id: "crimson", label: "Crimson", bg: "#130607", accent: "#ef4444", hot: "#fb923c" },
   { id: "ocean", label: "Ocean", bg: "#050f1b", accent: "#0ea5e9", hot: "#22d3ee" },

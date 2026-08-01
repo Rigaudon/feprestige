@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Chakra_Petch, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import { sanityFetch } from "@/sanity/client";
@@ -17,11 +18,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Angular "tech" display face for headings and nav labels — the gaming accent.
-const chakraPetch = Chakra_Petch({
+// RuneScape display face for headings and nav labels — the gaming accent.
+const runescape = localFont({
   variable: "--font-display-family",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  src: "./fonts/runescape_uf.woff2",
 });
 
 // Title/description come from Sanity Site Settings so editors control them.
@@ -105,15 +105,16 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${chakraPetch.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${runescape.variable} h-full antialiased`}
     >
       <body className="min-h-full text-fg">
         {/* Set the theme before first paint to avoid a flash: use the saved
-            choice, else match the OS light/dark preference. Runs as the first
-            thing in <body>; kept in sync afterwards by ThemePicker. */}
+            choice, else default to dark. No OS preference detection — the theme
+            is an explicit visitor choice. Runs as the first thing in <body>;
+            kept in sync afterwards by ThemePicker. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme");var ok=["dark","light","emerald","crimson","ocean","amber"];if(!t||ok.indexOf(t)===-1){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem("theme");var ok=["dark","gold","emerald","crimson","ocean","amber"];if(!t||ok.indexOf(t)===-1){t="dark";}document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`,
           }}
         />
         {children}

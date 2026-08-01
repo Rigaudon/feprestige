@@ -130,6 +130,7 @@ export function Sidebar({
             href={cta.url}
             target="_blank"
             rel="noopener noreferrer"
+            data-site-cta
             className="flex items-center justify-center rounded-lg bg-gradient-to-r from-accent to-accent-hot px-4 py-2.5 font-display text-sm font-bold uppercase tracking-wide text-fg shadow-[0_0_20px_-6px_var(--color-accent)] transition-all hover:shadow-[0_0_28px_-4px_var(--color-accent-hot)] hover:brightness-110 active:scale-[0.98] active:brightness-95"
           >
             {cta.label}
