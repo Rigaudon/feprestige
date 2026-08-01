@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { urlFor } from "@/sanity/image";
 import type { CarouselImage } from "@/sanity/types";
@@ -215,14 +216,17 @@ export function Carousel({
         </>
       ) : null}
 
-      {/* Lightbox overlay */}
-      {lightbox !== null ? (
+      {/* Lightbox overlay — portaled to <body> so it escapes the `main`
+          stacking context (relative z-10) and can layer above the fixed
+          sidebar (z-40) / mobile drawer (z-50) instead of behind them. */}
+      {lightbox !== null
+        ? createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Enlarged image"
           onClick={() => setLightbox(null)}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 p-4"
         >
           <button
             type="button"
@@ -283,8 +287,10 @@ export function Carousel({
               </button>
             </>
           ) : null}
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
