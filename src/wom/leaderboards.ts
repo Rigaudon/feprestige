@@ -1,15 +1,12 @@
-// Server-side leaderboard shaping. Instead of shipping every member × every
-// metric to the browser (huge — ~1.2 MB for a large clan) and sorting client-
-// side, we pre-sort at build/revalidate time and ship only a bounded top-N per
-// metric. This shrinks the payload and moves the work off the request path.
+// Server-side leaderboard shaping. Rather than shipping every member × every
+// metric with full snapshot data and sorting client-side, we pre-sort at
+// build/revalidate time into a compact { metric -> ranked entries } map. Every
+// ranked member is included (the whole clan appears, paginated in the browser);
+// the short-keyed LeaderEntry/GainEntry shapes keep the payload small.
 
 import { ALL_METRICS, METRIC_PROPS, type Metric } from "./metrics";
 import { snapshotLevel, snapshotValue } from "./queries";
 import type { BulkGainsEntry, BulkHiscoresEntry } from "./types";
-
-// How many ranked players to keep per metric. A leaderboard rarely needs more;
-// keeps the shipped payload bounded regardless of clan size.
-export const LEADERBOARD_SIZE = 50;
 
 // Compact leaderboard entry (short keys to keep the serialized payload small).
 export interface LeaderEntry {
@@ -31,8 +28,8 @@ function notableType(type: string): string | undefined {
   return type && type !== "regular" && type !== "unknown" ? type : undefined;
 }
 
-// Build a { metric -> top-N sorted entries } map from bulk hiscores. Only metrics
-// with at least one ranked member are included.
+// Build a { metric -> sorted entries } map from bulk hiscores, keeping every
+// ranked member. Only metrics with at least one ranked member are included.
 export function buildHiscoreLeaderboards(
   entries: BulkHiscoresEntry[],
 ): Record<string, LeaderEntry[]> {
@@ -42,8 +39,7 @@ export function buildHiscoreLeaderboards(
     const ranked = entries
       .map((e) => ({ e, v: snapshotValue(e.data.data, metric) }))
       .filter((x) => x.v > 0)
-      .sort((a, b) => b.v - a.v)
-      .slice(0, LEADERBOARD_SIZE);
+      .sort((a, b) => b.v - a.v);
 
     if (ranked.length === 0) continue;
 
@@ -66,7 +62,8 @@ export function buildHiscoreLeaderboards(
   return out;
 }
 
-// Build a { metric -> top-N gainers } map from bulk gains for one period.
+// Build a { metric -> gainers } map from bulk gains for one period, keeping
+// every member with a positive gain.
 export function buildGainLeaderboards(
   entries: BulkGainsEntry[],
 ): Record<string, GainEntry[]> {
@@ -86,8 +83,7 @@ export function buildGainLeaderboards(
     const ranked = indexed
       .map(({ player, gains }) => ({ player, g: gains.get(metric) ?? 0 }))
       .filter((x) => x.g > 0)
-      .sort((a, b) => b.g - a.g)
-      .slice(0, LEADERBOARD_SIZE);
+      .sort((a, b) => b.g - a.g);
 
     if (ranked.length === 0) continue;
 

@@ -87,7 +87,7 @@ export function GainsBoard({
         </div>
 
         <span className="ml-auto font-mono text-xs uppercase tracking-wider text-fg-subtle">
-          Top {entries.length}
+          {entries.length} ranked
         </span>
       </div>
 
