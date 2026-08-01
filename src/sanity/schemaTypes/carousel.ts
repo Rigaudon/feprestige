@@ -50,11 +50,14 @@ export const carousel = defineType({
     }),
   ],
   preview: {
-    select: { images: "images", first: "images.0" },
-    prepare: ({ images, first }) => ({
+    // Sanity's preview `select` can't read an array's length, so we show the first
+    // image as a thumbnail (proof the block is populated) plus its caption. The true
+    // image count is shown by the `images` array field's own header inside the block.
+    select: { media: "images.0", caption: "images.0.caption" },
+    prepare: ({ media, caption }) => ({
       title: "Image carousel",
-      subtitle: `${images?.length || 0} image${images?.length === 1 ? "" : "s"}`,
-      media: first,
+      subtitle: caption || "Drops gallery",
+      media,
     }),
   },
 });
