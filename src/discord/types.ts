@@ -17,11 +17,20 @@ export interface DiscordAttachment {
 // Forwarded messages carry the original message's content in a snapshot rather
 // than in the top-level fields. This is the primary case for the drops channel
 // (mods forward member drops), so we must read attachments from here too.
+// A mentioned user, as embedded in a message payload — lets us resolve `<@id>`
+// tokens to a readable name without a second API call.
+export interface DiscordUser {
+  id: string;
+  username: string;
+  global_name?: string | null;
+}
+
 export interface DiscordMessageSnapshot {
   message: {
     content?: string;
     timestamp?: string;
     attachments?: DiscordAttachment[];
+    mentions?: DiscordUser[];
   };
 }
 
@@ -30,6 +39,7 @@ export interface DiscordMessage {
   content: string;
   timestamp: string; // ISO
   attachments: DiscordAttachment[];
+  mentions?: DiscordUser[];
   message_snapshots?: DiscordMessageSnapshot[];
 }
 

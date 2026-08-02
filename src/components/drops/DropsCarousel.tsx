@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import type { Drop } from "@/discord/types";
 
+import { DiscordText } from "./DiscordText";
+
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
@@ -156,7 +158,7 @@ export function DropsCarousel({
         <div className="min-w-0">
           {current.caption ? (
             <p className="whitespace-pre-wrap break-words text-fg">
-              {current.caption}
+              <DiscordText content={current.caption} />
             </p>
           ) : (
             <p className="italic text-fg-subtle">No caption</p>
