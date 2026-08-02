@@ -7,7 +7,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { revalidateTag } from "next/cache";
 
 import { DROPS_BUCKET_BINDING, DROPS_TAG, MANIFEST_KEY } from "./env";
-import { extractImages, fetchMessages } from "./messages";
+import { extractImages, fetchMessages, resolveCaption } from "./messages";
 import { EMPTY_MANIFEST, type Drop, type Manifest } from "./types";
 
 // Bounds downloads per invocation. Cloudflare Workers cap outbound subrequests
@@ -50,7 +50,9 @@ async function readManifest(bucket: R2BucketLike): Promise<Manifest> {
   const obj = await bucket.get(MANIFEST_KEY);
   if (!obj) return { ...EMPTY_MANIFEST };
   try {
-    return await obj.json<Manifest>();
+    // Merge over the empty shape so older manifests (missing newer fields like
+    // `users`) get sane defaults.
+    return { ...EMPTY_MANIFEST, ...(await obj.json<Partial<Manifest>>()) };
   } catch {
     return { ...EMPTY_MANIFEST };
   }
@@ -132,6 +134,7 @@ export async function runSync(
   const bucket = await getBucket();
   const manifest = await readManifest(bucket);
   const known = new Set(manifest.drops.map((d) => d.id));
+  const userCache = new Map(Object.entries(manifest.users));
 
   const isFirstEver = !manifest.newestId && !manifest.oldestId;
 
@@ -167,7 +170,7 @@ export async function runSync(
       newDrops.push({
         id: a.id,
         key,
-        caption: img.caption,
+        caption: await resolveCaption(img.caption, img.mentions, userCache),
         date: img.date,
         w: a.width ?? undefined,
         h: a.height ?? undefined,
@@ -201,6 +204,7 @@ export async function runSync(
     oldestId,
     backfillComplete,
     syncedAt: new Date().toISOString(),
+    users: Object.fromEntries(userCache),
     drops: [...manifest.drops, ...newDrops],
   };
   await writeManifest(bucket, updated);
@@ -246,6 +250,8 @@ export async function runRecaption(): Promise<RecaptionResult> {
   const bucket = await getBucket();
   const manifest = await readManifest(bucket);
   const byId = new Map(manifest.drops.map((d) => [d.id, d]));
+  const userCache = new Map(Object.entries(manifest.users));
+  const usersBefore = userCache.size;
 
   let updated = 0;
   let scanned = 0;
@@ -254,7 +260,15 @@ export async function runRecaption(): Promise<RecaptionResult> {
   let before: string | undefined;
 
   for (let page = 0; page < MAX_PAGES; page++) {
-    const messages = await fetchMessages({ before });
+    let messages;
+    try {
+      messages = await fetchMessages({ before });
+    } catch {
+      // Likely the per-invocation subrequest cap (message pages + user lookups).
+      // Persist progress and let the caller re-run — it's idempotent and resolved
+      // names are cached in the manifest, so each run makes forward progress.
+      break;
+    }
     if (messages.length === 0) {
       done = true;
       break;
@@ -265,8 +279,13 @@ export async function runRecaption(): Promise<RecaptionResult> {
         const drop = byId.get(img.attachment.id);
         if (!drop) continue;
         matched++;
-        if (drop.caption !== img.caption) {
-          drop.caption = img.caption;
+        const caption = await resolveCaption(
+          img.caption,
+          img.mentions,
+          userCache,
+        );
+        if (drop.caption !== caption) {
+          drop.caption = caption;
           updated++;
         }
       }
@@ -278,9 +297,11 @@ export async function runRecaption(): Promise<RecaptionResult> {
     }
   }
 
-  if (updated > 0) {
+  // Persist if captions changed OR we resolved new names (so future runs skip them).
+  if (updated > 0 || userCache.size !== usersBefore) {
+    manifest.users = Object.fromEntries(userCache);
     await writeManifest(bucket, manifest);
-    revalidateTag(DROPS_TAG, "max");
+    if (updated > 0) revalidateTag(DROPS_TAG, "max");
   }
 
   return { updated, scanned, matched, done };

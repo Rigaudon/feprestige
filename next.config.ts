@@ -9,11 +9,17 @@ const nextConfig: NextConfig = {
         hostname: "cdn.sanity.io",
         pathname: "/images/**",
       },
-      // Re-hosted Discord "drops" images. Starts on the bucket's r2.dev URL;
-      // add the custom subdomain here when migrating (see src/discord/env.ts).
+      // Re-hosted Discord "drops" images — served from the bucket's r2.dev URL
+      // now, or a custom subdomain (e.g. drops.feprestige.com) later. The
+      // wildcard on our own domain means switching NEXT_PUBLIC_DROPS_CDN_BASE
+      // needs no code change (see src/discord/env.ts).
       {
         protocol: "https",
         hostname: "**.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "**.feprestige.com",
       },
     ],
   },

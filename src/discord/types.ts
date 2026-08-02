@@ -63,6 +63,9 @@ export interface Manifest {
   backfillComplete: boolean;
   // ISO time of the last successful sync — throttles the lazy trigger.
   syncedAt: string | null;
+  // Resolved mention names: discord user id -> display name. Persisted so a name
+  // is looked up (GET /users/{id}) at most once, ever — across all sync runs.
+  users: Record<string, string>;
   drops: Drop[];
 }
 
@@ -71,5 +74,6 @@ export const EMPTY_MANIFEST: Manifest = {
   oldestId: null,
   backfillComplete: false,
   syncedAt: null,
+  users: {},
   drops: [],
 };
