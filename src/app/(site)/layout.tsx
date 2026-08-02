@@ -1,6 +1,6 @@
 import { CursorGlow } from "@/components/CursorGlow";
 import { Sidebar } from "@/components/Sidebar";
-import { isDropsIngestConfigured } from "@/discord/env";
+import { isDropsConfigured } from "@/discord/env";
 import { sanityFetch } from "@/sanity/client";
 import { navQuery, settingsQuery } from "@/sanity/queries";
 import type { NavItem, Settings } from "@/sanity/types";
@@ -31,9 +31,10 @@ export default async function SiteLayout({
       ]
     : [];
 
-  // "Drop of the week" gallery — a code route (not a Sanity page), shown only
-  // once Discord ingest is connected. Appended after the WOM tabs.
-  const dropsNav = isDropsIngestConfigured
+  // "Drop of the week" gallery — a code route (not a Sanity page), shown once
+  // the image CDN base is set (a build-time value; see isDropsConfigured).
+  // Appended after the WOM tabs.
+  const dropsNav = isDropsConfigured
     ? [{ title: "Drops", href: "/drops" }]
     : [];
 

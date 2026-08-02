@@ -29,9 +29,15 @@ export const dropsCdnBase = (process.env.NEXT_PUBLIC_DROPS_CDN_BASE || "").repla
   "",
 );
 
-// Server-only. Ingest can't run without it; used to gate the nav tab so "Drops"
-// only appears once Discord is connected (same spirit as womEnabled).
+// Server-only, runtime secret. Gates ingest (the sync route / lazy trigger).
+// NOT suitable for gating the nav tab: it's absent during `next build`, so the
+// statically prerendered nav would drop the tab.
 export const isDropsIngestConfigured = Boolean(process.env.DISCORD_BOT_TOKEN);
+
+// Whether the Drops page can render — i.e. we know where images are served from.
+// This is a public, build-time value (unlike the bot token), so it's the correct
+// signal for gating the nav tab in the prerendered layout.
+export const isDropsConfigured = dropsCdnBase.length > 0;
 
 // Public URL for a stored object key.
 export function dropUrl(key: string): string {
