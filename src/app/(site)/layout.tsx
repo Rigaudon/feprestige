@@ -1,5 +1,6 @@
 import { CursorGlow } from "@/components/CursorGlow";
 import { Sidebar } from "@/components/Sidebar";
+import { isDropsIngestConfigured } from "@/discord/env";
 import { sanityFetch } from "@/sanity/client";
 import { navQuery, settingsQuery } from "@/sanity/queries";
 import type { NavItem, Settings } from "@/sanity/types";
@@ -30,10 +31,20 @@ export default async function SiteLayout({
       ]
     : [];
 
+  // "Drop of the week" gallery — a code route (not a Sanity page), shown only
+  // once Discord ingest is connected. Appended after the WOM tabs.
+  const dropsNav = isDropsIngestConfigured
+    ? [{ title: "Drops", href: "/drops" }]
+    : [];
+
   return (
     <div className="min-h-screen lg:pl-64">
       <CursorGlow />
-      <Sidebar settings={settings} navItems={navItems} extraNav={womNav} />
+      <Sidebar
+        settings={settings}
+        navItems={navItems}
+        extraNav={[...womNav, ...dropsNav]}
+      />
       <main className="relative z-10 min-h-screen">{children}</main>
     </div>
   );

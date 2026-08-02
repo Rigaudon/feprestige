@@ -22,7 +22,12 @@
   // re-rendered (re-fetching WOM) on every request. Create once with:
   //   npx wrangler r2 bucket create feprestige-cache
   "r2_buckets": [
-    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "feprestige-cache" }
+    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "feprestige-cache" },
+    // Re-hosted "drop of the week" images + manifest.json (see src/discord/).
+    // Public read is served from the bucket's r2.dev URL (later a custom
+    // subdomain). Create once with:
+    //   npx wrangler r2 bucket create feprestige-drops
+    { "binding": "DROPS_BUCKET", "bucket_name": "feprestige-drops" }
   ],
   // Tag cache for on-demand revalidation. revalidateTag() (the /api/revalidate
   // webhook) records invalidations here; without it, tag revalidation is a no-op
