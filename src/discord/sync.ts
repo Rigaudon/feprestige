@@ -224,6 +224,68 @@ export async function runSync(
   };
 }
 
+export interface RecaptionResult {
+  updated: number; // captions changed
+  scanned: number; // messages scanned
+  matched: number; // manifest drops seen in the scanned window
+  done: boolean; // reached the start of the channel within the page cap
+}
+
+/**
+ * Rewrite existing drops' captions in place from a fresh scan of the channel —
+ * used to backfill mention names (and any other markup fixes) onto drops that
+ * were ingested before caption resolution existed. Fetches message lists only
+ * (no image downloads), so it can page through a lot per invocation.
+ */
+export async function runRecaption(): Promise<RecaptionResult> {
+  // Message-list fetches count against the ~50 subrequest cap; 40 pages covers
+  // ~4000 messages. If a channel is larger, re-run (idempotent) — for a typical
+  // drops channel one pass is plenty.
+  const MAX_PAGES = 40;
+
+  const bucket = await getBucket();
+  const manifest = await readManifest(bucket);
+  const byId = new Map(manifest.drops.map((d) => [d.id, d]));
+
+  let updated = 0;
+  let scanned = 0;
+  let matched = 0;
+  let done = false;
+  let before: string | undefined;
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const messages = await fetchMessages({ before });
+    if (messages.length === 0) {
+      done = true;
+      break;
+    }
+    scanned += messages.length;
+    for (const m of messages) {
+      for (const img of extractImages(m)) {
+        const drop = byId.get(img.attachment.id);
+        if (!drop) continue;
+        matched++;
+        if (drop.caption !== img.caption) {
+          drop.caption = img.caption;
+          updated++;
+        }
+      }
+    }
+    before = messages[messages.length - 1].id;
+    if (messages.length < 100) {
+      done = true;
+      break;
+    }
+  }
+
+  if (updated > 0) {
+    await writeManifest(bucket, manifest);
+    revalidateTag(DROPS_TAG, "max");
+  }
+
+  return { updated, scanned, matched, done };
+}
+
 /**
  * Throttled incremental sync for the page's `after()` lazy trigger. Swallows all
  * errors (the manual sync route is the reliable path) so it can never break a

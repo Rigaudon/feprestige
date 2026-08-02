@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { runSync, type SyncMode } from "@/discord/sync";
+import { runRecaption, runSync, type SyncMode } from "@/discord/sync";
 
 // Manual / scheduled trigger for the Discord -> R2 drops ingest. Gated by a
 // bearer secret (DISCORD_SYNC_SECRET), mirroring the Sanity revalidate webhook.
@@ -28,11 +28,17 @@ export async function POST(req: NextRequest) {
   }
 
   const modeParam = req.nextUrl.searchParams.get("mode");
-  const mode: SyncMode = modeParam === "backfill" ? "backfill" : "incremental";
   const limitParam = req.nextUrl.searchParams.get("limit");
   const limit = limitParam ? Number(limitParam) : undefined;
 
   try {
+    // Rewrite existing captions (e.g. resolve @mentions) without re-downloading.
+    if (modeParam === "recaption") {
+      return NextResponse.json(await runRecaption());
+    }
+
+    const mode: SyncMode =
+      modeParam === "backfill" ? "backfill" : "incremental";
     const result = await runSync({
       mode,
       limit: Number.isFinite(limit) ? limit : undefined,
