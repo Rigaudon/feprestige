@@ -102,9 +102,11 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
 - **Env:** `NEXT_PUBLIC_DROPS_CDN_BASE` (public, **build-time**), `DISCORD_BOT_TOKEN` +
   `DISCORD_SYNC_SECRET` (**runtime** secrets), `DISCORD_DROPS_CHANNEL_ID` (optional; defaults
   to the clan channel). R2 binding `DROPS_BUCKET` in `wrangler.jsonc`.
-- **Known limitation:** `recaption` only resolves `<@id>` mentions that appear in the message
-  payload's `mentions` array; **forwarded** snapshots often omit it, so those still show a
-  generic `@user` chip. A `GET /users/{id}` lookup fallback would fix it (not yet built).
+- **Mentions:** `<@id>` tokens resolve to `@name` from the message payload, falling back to
+  `GET /users/{id}` for forwarded snapshots (which omit the `mentions` array). Resolved names
+  are cached in the manifest's `users` map (fetched once, ever). Only ids that no longer
+  resolve (e.g. deleted users) degrade to a neutral chip. Run `?mode=recaption` once after a
+  deploy to fix drops ingested before this existed.
 
 ## Conventions & gotchas (already solved — don't relearn the hard way)
 
