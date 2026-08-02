@@ -65,14 +65,46 @@ Studio at /admin                Next.js on Cloudflare (build-time fetch → stat
 ## Where things are
 
 ```
-src/app/(site)/       public site: layout (nav/footer), home page, [slug] tabs
+src/app/(site)/       public site: layout (nav/footer), home page, [slug] tabs, drops/
 src/app/(studio)/admin/[[...tool]]/   embedded Studio (client-only, ssr:false)
 src/app/api/revalidate/route.ts       signed Sanity webhook → revalidateTag
-src/components/       Nav, Footer, Hero, PortableText, Studio
+src/app/api/discord/sync/route.ts     secret-gated Discord→R2 ingest (backfill/incremental/recaption)
+src/components/       Nav, Footer, Hero, PortableText, Studio; drops/ (carousel, DiscordText); wom/
 src/sanity/           client.ts env.ts image.ts queries.ts types.ts + schemaTypes/
+src/discord/          Drops ingest: env client messages sync types (re-hosts images to R2)
+src/wom/              Wise Old Man integration (roster/hiscores/gains)
 sanity.config.ts sanity.cli.ts        Studio/CLI config (root)
 next.config.ts open-next.config.ts wrangler.jsonc
 ```
+
+## Drops (drop of the week) — `src/discord/`
+
+A curated image feed mirrored from a Discord channel (moderators post/forward member loot
+drops). Unlike Sanity content, it's a separate ingest → storage → read pipeline:
+
+- **Ingest → R2:** `POST /api/discord/sync` (bearer `DISCORD_SYNC_SECRET`) pulls channel
+  messages with the bot token, extracts images from **both** direct attachments **and
+  forwarded `message_snapshots`**, dedups by attachment id, and re-hosts them to the
+  `feprestige-drops` R2 bucket — Discord CDN urls are signed and **expire (~24h)**, so we
+  must re-host. A `manifest.json` in the bucket holds the drop records + backfill/incremental
+  cursors. Modes: `?mode=backfill` (drain history, batched — re-run until `done:true`),
+  `?mode=incremental` (new drops), `?mode=recaption` (rewrite captions in place).
+- **Read → page:** `/drops` reads the public `manifest.json` over HTTP (Next Data Cache, tag
+  `discord-drops`, 1h revalidate — same pattern as `womFetch`), rendered newest-first by
+  `DropsCarousel`. Images are served from the bucket's public **r2.dev** URL via
+  `NEXT_PUBLIC_DROPS_CDN_BASE`; the manifest stores **keys only**, so moving to a custom
+  subdomain later is a one-line env change with no re-ingest.
+- **Captions:** `DiscordText` renders Discord markup (bold/italic/strike/code/spoiler,
+  custom emoji as images, mentions/channels as chips). Underscore-italics are intentionally
+  not parsed so item names like `twisted_bow` render literally.
+- **Auto-update:** the page's `after()` schedules a throttled incremental sync on
+  revalidation — no cron, no separate worker.
+- **Env:** `NEXT_PUBLIC_DROPS_CDN_BASE` (public, **build-time**), `DISCORD_BOT_TOKEN` +
+  `DISCORD_SYNC_SECRET` (**runtime** secrets), `DISCORD_DROPS_CHANNEL_ID` (optional; defaults
+  to the clan channel). R2 binding `DROPS_BUCKET` in `wrangler.jsonc`.
+- **Known limitation:** `recaption` only resolves `<@id>` mentions that appear in the message
+  payload's `mentions` array; **forwarded** snapshots often omit it, so those still show a
+  generic `@user` chip. A `GET /users/{id}` lookup fallback would fix it (not yet built).
 
 ## Conventions & gotchas (already solved — don't relearn the hard way)
 
@@ -86,6 +118,17 @@ next.config.ts open-next.config.ts wrangler.jsonc
 - **Build resilience:** `sanityFetch` returns a `fallback` and `createClient` uses a
   `"placeholder"` projectId when `isSanityConfigured` is false, so the app builds/renders
   (empty state) even without Sanity connected.
+- **Build-time vs runtime env (Cloudflare):** `.env.local` + `NEXT_PUBLIC_*` are available
+  during `next build` (inlined); **wrangler secrets** (`DISCORD_BOT_TOKEN`,
+  `DISCORD_SYNC_SECRET`, `SANITY_REVALIDATE_SECRET`) are **runtime-only** and *absent* at
+  build. Never gate prerendered UI (nav, SSG pages) on a secret — it gets baked out. Bug hit
+  once: the Drops nav tab was gated on `DISCORD_BOT_TOKEN` and vanished; it now gates on
+  `NEXT_PUBLIC_DROPS_CDN_BASE` (build-time). Runtime code (route handlers, `after()` on
+  revalidation) can still read secrets from `process.env`.
+- **Stale fetch-cache bakes into a deploy:** `next build` reuses `.next/cache/fetch-cache`,
+  so a rebuild can prerender **stale Sanity data** — a deleted page reappears, or a new
+  page/tab is missing. If content looks wrong after a deploy, do a **clean build** (wipe
+  `.next`, or `npm run build` fresh) then `npm run deploy`. See `DEPLOYMENT.md`.
 - **`.env*` files are permission-blocked** from Read/Edit/Bash in this environment — ask
   the user to edit `.env.local`; don't try to read or write it.
 - **Local build fetch fails behind the corporate proxy:** Node's `fetch`/undici ignores
