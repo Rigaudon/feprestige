@@ -21,13 +21,16 @@ export const DROPS_BUCKET_BINDING = "DROPS_BUCKET";
 // Manifest object key at the bucket root.
 export const MANIFEST_KEY = "manifest.json";
 
-// Public base URL images are served from — the bucket's r2.dev URL for now, a
-// custom subdomain later. Because the manifest stores only object keys, swapping
-// this is the whole migration (no re-ingest). Trailing slashes trimmed.
-export const dropsCdnBase = (process.env.NEXT_PUBLIC_DROPS_CDN_BASE || "").replace(
-  /\/+$/,
-  "",
-);
+// Public base URL images are served from. Defaults to the clan's custom
+// subdomain — a public, non-secret value — so builds/deploys need no env-var
+// configuration and can't silently lose it (like projectId in sanity/env.ts).
+// This matters because .env.local is gitignored: a build that doesn't load it
+// (a fresh checkout, or a Cloudflare git-integration build) would otherwise bake
+// an empty base, dropping the Drops tab + images. Override via .env.local for
+// local dev or a different bucket. Trailing slashes trimmed.
+export const dropsCdnBase = (
+  process.env.NEXT_PUBLIC_DROPS_CDN_BASE || "https://drops.feprestige.com"
+).replace(/\/+$/, "");
 
 // Server-only, runtime secret. Gates ingest (the sync route / lazy trigger).
 // NOT suitable for gating the nav tab: it's absent during `next build`, so the

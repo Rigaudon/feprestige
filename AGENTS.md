@@ -101,9 +101,12 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
   hits `?mode=incremental` — the reliable path (needs repo secret `DISCORD_SYNC_SECRET`). The
   page's `after()` also schedules a throttled incremental sync on revalidation, but that only
   fires on a visit that lands on a revalidation, so it's a best-effort supplement.
-- **Env:** `NEXT_PUBLIC_DROPS_CDN_BASE` (public, **build-time**), `DISCORD_BOT_TOKEN` +
-  `DISCORD_SYNC_SECRET` (**runtime** secrets), `DISCORD_DROPS_CHANNEL_ID` (optional; defaults
-  to the clan channel). R2 binding `DROPS_BUCKET` in `wrangler.jsonc`.
+- **Env:** `NEXT_PUBLIC_DROPS_CDN_BASE` (public, **build-time**; defaults to
+  `https://drops.feprestige.com` baked into `env.ts` so a build that doesn't load the
+  gitignored `.env.local` — fresh checkout, Cloudflare git-integration build — can't silently
+  drop the tab/images), `DISCORD_BOT_TOKEN` + `DISCORD_SYNC_SECRET` (**runtime** secrets),
+  `DISCORD_DROPS_CHANNEL_ID` (optional; defaults to the clan channel). R2 binding
+  `DROPS_BUCKET` in `wrangler.jsonc`.
 - **Mentions:** `<@id>` tokens resolve to `@name` from the message payload, falling back to
   `GET /users/{id}` for forwarded snapshots (which omit the `mentions` array). Resolved names
   are cached in the manifest's `users` map (fetched once, ever). Only ids that no longer
