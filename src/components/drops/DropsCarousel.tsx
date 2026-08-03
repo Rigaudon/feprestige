@@ -116,21 +116,31 @@ export function DropsCarousel({
   return (
     <div className="flex flex-col gap-5">
       <div className="relative">
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-surface">
+        {/* The stage links to the original R2 image and is rendered unoptimized,
+            so its src is the real drops.<domain> url — clicking or opening it in a
+            new tab shows the image inline instead of the /_next/image optimizer
+            endpoint (which downloads). Thumbnails below stay optimized. */}
+        <a
+          href={`${cdnBase}/${current.key}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open the full image in a new tab"
+          className="relative block aspect-video w-full overflow-hidden rounded-xl border border-border bg-surface"
+        >
           {mounted.map((i) => (
             <Image
               key={drops[i].id}
               src={`${cdnBase}/${drops[i].key}`}
               alt={drops[i].caption || "Clan drop"}
               fill
-              sizes="(max-width: 1024px) 100vw, 900px"
+              unoptimized
               priority={i === index}
               className={`object-contain transition-opacity duration-200 ${
                 i === index ? "opacity-100" : "opacity-0"
               }`}
             />
           ))}
-        </div>
+        </a>
 
         {count > 1 ? (
           <>

@@ -97,8 +97,10 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
 - **Captions:** `DiscordText` renders Discord markup (bold/italic/strike/code/spoiler,
   custom emoji as images, mentions/channels as chips). Underscore-italics are intentionally
   not parsed so item names like `twisted_bow` render literally.
-- **Auto-update:** the page's `after()` schedules a throttled incremental sync on
-  revalidation — no cron, no separate worker.
+- **Auto-update:** a GitHub Actions cron (`.github/workflows/drops-sync.yml`, every ~15 min)
+  hits `?mode=incremental` — the reliable path (needs repo secret `DISCORD_SYNC_SECRET`). The
+  page's `after()` also schedules a throttled incremental sync on revalidation, but that only
+  fires on a visit that lands on a revalidation, so it's a best-effort supplement.
 - **Env:** `NEXT_PUBLIC_DROPS_CDN_BASE` (public, **build-time**), `DISCORD_BOT_TOKEN` +
   `DISCORD_SYNC_SECRET` (**runtime** secrets), `DISCORD_DROPS_CHANNEL_ID` (optional; defaults
   to the clan channel). R2 binding `DROPS_BUCKET` in `wrangler.jsonc`.
