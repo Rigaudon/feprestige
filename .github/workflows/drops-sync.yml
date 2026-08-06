@@ -1,9 +1,11 @@
 name: Sync Discord drops
 
-# Reliably pulls new "drop of the week" images into R2 on a schedule, so drops
-# appear without depending on the page's lazy after() trigger (which only fires
-# on a visit that happens to land on a revalidation). Just calls the existing
-# secret-gated sync route.
+# FALLBACK trigger for the "drop of the week" ingest. The reliable PRIMARY schedule
+# is now a Cloudflare Cron Trigger (wrangler.jsonc `triggers.crons` ->
+# custom-worker.ts `scheduled`), which fires on the worker itself every 15 min.
+# GitHub's `schedule:` is best-effort and was leaving runs queued for hours, so we
+# no longer depend on it — this stays as a cheap hourly backup that just calls the
+# same secret-gated sync route.
 #
 # Setup (one-time): add repo secret DISCORD_SYNC_SECRET
 #   (Settings -> Secrets and variables -> Actions) matching the value set on the
@@ -11,22 +13,27 @@ name: Sync Discord drops
 
 on:
   schedule:
-    # Every ~15 min (best-effort; GitHub delays scheduled runs under load).
-    - cron: "7,22,37,52 * * * *"
+    # Hourly backup (Cloudflare cron is primary). Off the :00 mark to dodge the
+    # heavily-contended top-of-hour scheduler slot.
+    - cron: "17 * * * *"
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
-# Don't stack runs if one is slow.
+# Supersede any run still waiting on a runner instead of piling them up — the sync
+# is idempotent, so only the newest queued run matters.
 concurrency:
   group: drops-sync
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    # Fail fast instead of counting slow: a stuck request should error in minutes,
+    # not masquerade as a multi-minute hang.
+    timeout-minutes: 3
     steps:
       - name: Trigger incremental sync
         run: |
-          curl -fsS -X POST \
+          curl -fsS --max-time 90 -X POST \
             -H "Authorization: Bearer ${{ secrets.DISCORD_SYNC_SECRET }}" \
             "https://feprestige.com/api/discord/sync?mode=incremental" \
             -w '\nHTTP %{http_code}\n'

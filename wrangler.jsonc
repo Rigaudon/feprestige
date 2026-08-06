@@ -1,7 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "feprestige",
-  "main": ".open-next/worker.js",
+  // Custom entrypoint that wraps the OpenNext-generated worker and adds a
+  // `scheduled` handler (see custom-worker.ts). It imports .open-next/worker.js,
+  // so the OpenNext build must still run first (it does — `opennextjs-cloudflare
+  // build` in the deploy script generates .open-next/ before wrangler bundles).
+  "main": "custom-worker.ts",
   "compatibility_date": "2025-06-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -44,5 +48,11 @@
   // Attaches the custom domain on deploy. Requires the zone (feprestige.com) to
   // live in the same Cloudflare account — it does, since the domain is registered
   // there. Cloudflare provisions the DNS record + TLS cert automatically.
-  "routes": [{ "pattern": "feprestige.com", "custom_domain": true }]
+  "routes": [{ "pattern": "feprestige.com", "custom_domain": true }],
+  // Cron Trigger for the Discord "drops" incremental sync — the reliable primary
+  // schedule (GitHub Actions cron is best-effort and was leaving runs queued for
+  // hours). Fires custom-worker.ts's `scheduled` handler every 15 min, which calls
+  // the secret-gated /api/discord/sync route in-process. Requires the runtime
+  // secret DISCORD_SYNC_SECRET on the worker.
+  "triggers": { "crons": ["*/15 * * * *"] }
 }

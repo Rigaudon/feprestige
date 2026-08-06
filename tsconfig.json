@@ -30,5 +30,10 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    // Cloudflare Worker entrypoint: imports build-only output (.open-next/worker.js)
+    // and is bundled by wrangler's esbuild, not type-checked by next build.
+    "custom-worker.ts"
+  ]
 }

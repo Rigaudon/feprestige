@@ -97,10 +97,20 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
 - **Captions:** `DiscordText` renders Discord markup (bold/italic/strike/code/spoiler,
   custom emoji as images, mentions/channels as chips). Underscore-italics are intentionally
   not parsed so item names like `twisted_bow` render literally.
-- **Auto-update:** a GitHub Actions cron (`.github/workflows/drops-sync.yml`, every ~15 min)
-  hits `?mode=incremental` — the reliable path (needs repo secret `DISCORD_SYNC_SECRET`). The
-  page's `after()` also schedules a throttled incremental sync on revalidation, but that only
-  fires on a visit that lands on a revalidation, so it's a best-effort supplement.
+- **Auto-update:** a **Cloudflare Cron Trigger** (`wrangler.jsonc` `triggers.crons`, every
+  15 min) fires `custom-worker.ts`'s `scheduled` handler, which calls `?mode=incremental`
+  in-process — this is the reliable **primary** schedule. A GitHub Actions cron
+  (`.github/workflows/drops-sync.yml`, hourly) is a **fallback** hitting the same route over
+  HTTP (needs repo secret `DISCORD_SYNC_SECRET`). We moved off GitHub-cron-as-primary because
+  its `schedule:` is best-effort and was leaving runs queued for hours (drops stopped
+  updating). The page's `after()` also schedules a throttled incremental sync on revalidation,
+  but that only fires on a visit that lands on a revalidation, so it's a best-effort supplement.
+- **Custom worker entrypoint:** to add the cron `scheduled` handler we wrap the
+  OpenNext-generated `.open-next/worker.js` (which only exports `fetch` and is rebuilt every
+  deploy) in `custom-worker.ts` and point `wrangler.jsonc` `main` at it (the OpenNext-sanctioned
+  pattern). It re-exports the OpenNext Durable Objects and is excluded from tsconfig/eslint
+  (imports build-only output; wrangler's esbuild bundles it). `DISCORD_SYNC_SECRET` must be set
+  as a worker secret for the cron to authenticate to the route.
 - **Env:** `NEXT_PUBLIC_DROPS_CDN_BASE` (public, **build-time**; defaults to
   `https://drops.feprestige.com` baked into `env.ts` so a build that doesn't load the
   gitignored `.env.local` — fresh checkout, Cloudflare git-integration build — can't silently
