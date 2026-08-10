@@ -94,6 +94,78 @@ async function listGuilds() {
   for (const g of guilds) console.log(`${g.id}  ${g.name}`);
 }
 
+// Diagnose 403s: report whether the bot really has Administrator, its highest
+// role position, and — for any role IDs given — whether that role is assignable
+// by the bot (must be BELOW the bot's top role and not managed).
+async function check(guildId, roleIds) {
+  const ADMIN = 0x8n;
+  const MANAGE_ROLES = 0x10000000n; // 1 << 28
+  const me = await api("/users/@me");
+  const roles = await api(`/guilds/${guildId}/roles`);
+  const byId = new Map(roles.map((r) => [r.id, r]));
+  const botMember = await api(`/guilds/${guildId}/members/${me.id}`);
+
+  // Effective perms = OR of every role the bot holds (incl. @everyone = guildId).
+  let hasAdmin = false;
+  let hasManageRoles = false;
+  let botTopPos = -1;
+  let botTopName = "(none)";
+  const botRoleIds = [...botMember.roles, guildId];
+  for (const rid of botRoleIds) {
+    const r = byId.get(rid);
+    if (!r) continue;
+    const perms = BigInt(r.permissions);
+    if ((perms & ADMIN) === ADMIN) hasAdmin = true;
+    if ((perms & MANAGE_ROLES) === MANAGE_ROLES) hasManageRoles = true;
+    if (r.position > botTopPos) {
+      botTopPos = r.position;
+      botTopName = r.name;
+    }
+  }
+  // Administrator implies every permission, including Manage Roles.
+  const canManageRoles = hasAdmin || hasManageRoles;
+
+  console.log(`Bot: ${me.username} (${me.id})`);
+  console.log(`Administrator: ${hasAdmin ? "YES" : "no"}`);
+  console.log(
+    `Can manage roles: ${canManageRoles ? "YES" : "NO"}` +
+      (hasAdmin ? " (via Administrator)" : hasManageRoles ? " (Manage Roles)" : ""),
+  );
+  console.log(`Bot's highest role: "${botTopName}" (position ${botTopPos})`);
+  console.log(
+    "\nNote: a bot can only manage roles BELOW its own highest role, and can't\n" +
+      "touch managed roles (booster/other-bot roles) or members whose top role is\n" +
+      "at/above the bot's — even with Administrator.\n",
+  );
+
+  if (!roleIds.length) {
+    console.log("Pass role IDs to check assignability, e.g.:");
+    console.log(`  check ${guildId} <roleId1> <roleId2> ...`);
+    return;
+  }
+
+  console.log("Target roles:");
+  for (const id of roleIds) {
+    const r = byId.get(id);
+    if (!r) {
+      console.log(`  ${id}  NOT FOUND in this guild`);
+      continue;
+    }
+    const managed = r.managed === true;
+    const assignable = canManageRoles && r.position < botTopPos && !managed;
+    const why = !canManageRoles
+      ? "bot lacks Manage Roles"
+      : managed
+        ? "managed role — cannot be assigned manually"
+        : r.position >= botTopPos
+          ? `at/above bot's top role (pos ${r.position} >= ${botTopPos}) — move the bot's role higher`
+          : "OK";
+    console.log(
+      `  ${assignable ? "OK  " : "BLOCKED"}  "${r.name}" (pos ${r.position})  ${assignable ? "" : "— " + why}`,
+    );
+  }
+}
+
 async function listRoles(guildId) {
   const roles = await api(`/guilds/${guildId}/roles`);
   roles.sort((a, b) => b.position - a.position);
@@ -121,6 +193,42 @@ async function listRoles(guildId) {
   if (!counted) {
     console.log(
       "\n(no member counts — enable the Server Members Intent in the Developer Portal)",
+    );
+  }
+}
+
+// Apply a role change to each affected member. Skips (doesn't abort on) members
+// the bot can't edit — e.g. a 403 because their top role outranks the bot — and
+// reports them at the end, so one un-editable member doesn't block the rest.
+async function applyToMembers(guildId, affected, nextRolesFor, reason) {
+  let done = 0;
+  const failed = [];
+  for (const m of affected) {
+    const name = m.user.global_name || m.user.username;
+    try {
+      await api(`/guilds/${guildId}/members/${m.user.id}`, {
+        method: "PATCH",
+        body: { roles: nextRolesFor(m) },
+        reason,
+      });
+      done++;
+      console.log(`  [${done}/${affected.length}] ${name}`);
+    } catch (err) {
+      failed.push({ name, id: m.user.id, msg: err.message || String(err) });
+      console.log(`  SKIPPED ${name} (${m.user.id}) — ${err.message || err}`);
+    }
+    // Gentle throttle to stay well under per-guild write limits.
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  console.log(`\nDone. Updated ${done} member(s).`);
+  if (failed.length) {
+    console.log(`Skipped ${failed.length} the bot couldn't edit:`);
+    for (const f of failed) console.log(`  ${f.name} (${f.id}) — ${f.msg}`);
+    console.log(
+      "\nThese usually have a top role at/above the bot's — fix them by hand, or\n" +
+        "move the bot's role higher and re-run (already-moved members are skipped\n" +
+        "as no-ops).",
     );
   }
 }
@@ -153,22 +261,16 @@ async function swap(guildId, fromId, toId, commit) {
     return;
   }
 
-  let done = 0;
-  for (const m of affected) {
-    const next = m.roles.filter((r) => r !== fromId);
-    if (!next.includes(toId)) next.push(toId);
-    await api(`/guilds/${guildId}/members/${m.user.id}`, {
-      method: "PATCH",
-      body: { roles: next },
-      reason: `One-off role swap ${from.name} -> ${to.name}`,
-    });
-    done++;
-    const name = m.user.global_name || m.user.username;
-    console.log(`  [${done}/${affected.length}] ${name}`);
-    // Gentle throttle to stay well under per-guild write limits.
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  console.log(`\nDone. Updated ${done} member(s).`);
+  await applyToMembers(
+    guildId,
+    affected,
+    (m) => {
+      const next = m.roles.filter((r) => r !== fromId);
+      if (!next.includes(toId)) next.push(toId);
+      return next;
+    },
+    `One-off role swap ${from.name} -> ${to.name}`,
+  );
 }
 
 async function consolidate(guildId, toId, fromIds, commit) {
@@ -210,21 +312,16 @@ async function consolidate(guildId, toId, fromIds, commit) {
     return;
   }
 
-  let done = 0;
-  for (const m of affected) {
-    const next = m.roles.filter((r) => !fromSet.has(r));
-    if (!next.includes(toId)) next.push(toId);
-    await api(`/guilds/${guildId}/members/${m.user.id}`, {
-      method: "PATCH",
-      body: { roles: next },
-      reason: `One-off role consolidation into ${to.name}`,
-    });
-    done++;
-    const name = m.user.global_name || m.user.username;
-    console.log(`  [${done}/${affected.length}] ${name}`);
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  console.log(`\nDone. Updated ${done} member(s).`);
+  await applyToMembers(
+    guildId,
+    affected,
+    (m) => {
+      const next = m.roles.filter((r) => !fromSet.has(r));
+      if (!next.includes(toId)) next.push(toId);
+      return next;
+    },
+    `One-off role consolidation into ${to.name}`,
+  );
 }
 
 async function main() {
@@ -240,6 +337,9 @@ async function main() {
     case "roles":
       if (!args[0]) throw new Error("Usage: roles <guildId>");
       return listRoles(args[0]);
+    case "check":
+      if (!args[0]) throw new Error("Usage: check <guildId> [roleId...]");
+      return check(args[0], args.slice(1));
     case "swap":
       if (args.length < 3)
         throw new Error(
@@ -257,6 +357,7 @@ async function main() {
         "Modes:\n" +
           "  guilds\n" +
           "  roles       <guildId>\n" +
+          "  check       <guildId> [roleId...]\n" +
           "  swap        <guildId> <fromRoleId> <toRoleId> [--dry-run | --commit]\n" +
           "  consolidate <guildId> <newRoleId> <oldRoleId...> [--dry-run | --commit]",
       );
