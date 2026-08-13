@@ -6,6 +6,7 @@ import type { PortableTextBlock } from "next-sanity";
 import Image from "next/image";
 
 import { imageDimensions, urlFor } from "@/sanity/image";
+import { fontSizeStyle, type FontSizeMark } from "@/sanity/textSizes";
 import type { Carousel as CarouselValue, ImageWithAlt, VideoEmbed } from "@/sanity/types";
 import { parseVideoUrl } from "@/sanity/video";
 
@@ -143,6 +144,17 @@ const components: PortableTextComponents = {
     strong: ({ children }) => (
       <strong className="font-semibold text-fg">{children}</strong>
     ),
+    // Per-selection font size set by an editor (see sanity/textSizes.ts).
+    // An out-of-range or missing size renders the text untouched rather than
+    // emitting a broken style.
+    fontSize: ({ children, value }) => {
+      const fontSize = fontSizeStyle((value as FontSizeMark | undefined)?.size);
+      return fontSize ? (
+        <span style={{ fontSize }}>{children}</span>
+      ) : (
+        <>{children}</>
+      );
+    },
   },
 };
 
