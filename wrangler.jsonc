@@ -49,10 +49,18 @@
   // live in the same Cloudflare account — it does, since the domain is registered
   // there. Cloudflare provisions the DNS record + TLS cert automatically.
   "routes": [{ "pattern": "feprestige.com", "custom_domain": true }],
-  // Cron Trigger for the Discord "drops" incremental sync — the reliable primary
-  // schedule (GitHub Actions cron is best-effort and was leaving runs queued for
-  // hours). Fires custom-worker.ts's `scheduled` handler every 15 min, which calls
-  // the secret-gated /api/discord/sync route in-process. Requires the runtime
-  // secret DISCORD_SYNC_SECRET on the worker.
-  "triggers": { "crons": ["*/15 * * * *"] }
+  // Cron Triggers. Both fire custom-worker.ts's `scheduled` handler, which
+  // dispatches on the cron expression and calls the matching secret-gated route
+  // in-process. Requires the runtime secret DISCORD_SYNC_SECRET on the worker
+  // (shared by both jobs).
+  //
+  //   */15 * * * *     Discord "drops" incremental sync — the reliable primary
+  //                    schedule (GitHub Actions cron is best-effort and was
+  //                    leaving runs queued for hours).
+  //   7,27,47 * * * *  OSRS wiki combat-achievements ingest (src/wiki/). Walks
+  //                    ~20 clan members per run, so a full pass takes ~4h. On a
+  //                    separate tick from drops because the 50-subrequest cap is
+  //                    per invocation. Keep in sync with WIKI_CRON in
+  //                    custom-worker.ts.
+  "triggers": { "crons": ["*/15 * * * *", "7,27,47 * * * *"] }
 }

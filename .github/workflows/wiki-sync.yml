@@ -1,0 +1,81 @@
+name: Sync wiki combat achievements
+
+# Manual driver + fallback for the OSRS wiki combat-achievements ingest
+# (src/wiki/). The reliable PRIMARY schedule is the Cloudflare Cron Trigger
+# (wrangler.jsonc `triggers.crons` "7,27,47 * * * *" -> custom-worker.ts
+# `scheduled`), which walks ~20 members every 20 min — a full pass over the
+# ~300-member roster takes roughly 4h on its own.
+#
+# This workflow exists for the two things that schedule can't do:
+#   - "Fill it now": run it from the Actions tab to drain the whole roster in
+#     one go (a few minutes) instead of waiting for the cron to get there. Also
+#     the only way to drive the ingest from a network that can't reach
+#     feprestige.com directly.
+#   - A backup if the Cloudflare cron ever stops firing.
+#
+# Setup: none. It reuses the DISCORD_SYNC_SECRET repo secret that drops-sync.yml
+# already uses — that is the site's single shared ingest secret.
+
+on:
+  schedule:
+    # Light backup only. Drains at most a few batches so it can't run long and
+    # overlap the Cloudflare cron (see the concurrency note below). Off the :00
+    # mark to dodge the contended top-of-hour scheduler slot.
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "refresh = walk the roster; rescore = recompute from stored data (no player fetches)"
+        type: choice
+        options: [refresh, rescore]
+        default: refresh
+      batch:
+        description: "Members per request (max 40; the worker caps it)"
+        default: "20"
+      max_runs:
+        description: "Stop after this many requests, even if the roster isn't finished"
+        default: "25"
+
+# Supersede any run still waiting on a runner rather than piling them up — the
+# ingest is cursor-based, so only the newest queued run matters.
+concurrency:
+  group: wiki-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SECRET: ${{ secrets.DISCORD_SYNC_SECRET }}
+      MODE: ${{ inputs.mode || 'refresh' }}
+      BATCH: ${{ inputs.batch || '20' }}
+      # Scheduled runs keep it short; a manual run can drain the whole roster.
+      MAX_RUNS: ${{ inputs.max_runs || '5' }}
+    steps:
+      - name: Drive the ingest
+        run: |
+          if [ "$MODE" = "rescore" ]; then
+            curl -fsS --max-time 120 -X POST \
+              -H "Authorization: Bearer $SECRET" \
+              "https://feprestige.com/api/wiki/sync?mode=rescore" \
+              -w '\nHTTP %{http_code}\n'
+            exit 0
+          fi
+
+          # Each request advances the cursor by one batch; `wrapped` tells us a
+          # full pass over the roster just finished, so there's nothing to gain
+          # from further requests right now.
+          for i in $(seq 1 "$MAX_RUNS"); do
+            echo "--- request $i/$MAX_RUNS"
+            body=$(curl -fsS --max-time 120 -X POST \
+              -H "Authorization: Bearer $SECRET" \
+              "https://feprestige.com/api/wiki/sync?batch=$BATCH")
+            echo "$body" | jq -c .
+            if [ "$(echo "$body" | jq -r '.wrapped')" = "true" ]; then
+              echo "Full pass complete after $i request(s)."
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Stopped after $MAX_RUNS request(s). The cursor advanced — re-run to continue."

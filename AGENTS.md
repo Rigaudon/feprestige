@@ -69,10 +69,12 @@ src/app/(site)/       public site: layout (nav/footer), home page, [slug] tabs, 
 src/app/(studio)/admin/[[...tool]]/   embedded Studio (client-only, ssr:false)
 src/app/api/revalidate/route.ts       signed Sanity webhook → revalidateTag
 src/app/api/discord/sync/route.ts     secret-gated Discord→R2 ingest (backfill/incremental/recaption)
-src/components/       Nav, Footer, Hero, PortableText, Studio; drops/ (carousel, DiscordText); wom/
+src/app/api/wiki/sync/route.ts        secret-gated OSRS wiki→R2 combat-achievements ingest
+src/components/       Nav, Footer, Hero, PortableText, Studio; drops/ (carousel, DiscordText); wom/; wiki/
 src/sanity/           client.ts env.ts image.ts queries.ts types.ts + schemaTypes/
 src/discord/          Drops ingest: env client messages sync types (re-hosts images to R2)
 src/wom/              Wise Old Man integration (roster/hiscores/gains)
+src/wiki/             OSRS wiki integration (combat achievements): env ca client sync types
 sanity.config.ts sanity.cli.ts        Studio/CLI config (root)
 next.config.ts open-next.config.ts wrangler.jsonc
 ```
@@ -123,6 +125,53 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
   resolve (e.g. deleted users) degrade to a neutral chip. Run `?mode=recaption` once after a
   deploy to fix drops ingested before this existed.
 
+## Combat Achievements — `src/wiki/`
+
+A clan CA leaderboard at `/combat-achievements`, sourced from the OSRS Wiki rather than WOM
+(WOM has no CA data). Same ingest → R2 → read shape as Drops, for the same reason: it needs one
+request **per member**, which can't happen in a page render.
+
+- **Two upstreams, both anonymous.** (1) `sync.runescape.wiki/runelite/player/{name}/STANDARD` —
+  the RuneLite **Wiki Sync** plugin backend, returning whatever that player last synced. It
+  **403s without a `User-Agent`**, only accepts the `STANDARD` world type, and answers
+  `400 NO_USER_DATA` for players who've never used the plugin (~45 of our 300 — normal, they're
+  just hidden from the page). (2) the wiki's `action=bucket` API for the task table (below).
+- **Rate limit is real and undocumented.** 300 requests at concurrency 6 got `429` on 177 of them;
+  fully sequential got zero. The ingest is sequential with a 150 ms gap and one 429 retry. Don't
+  "optimise" it into parallel fetches.
+- **Nothing about CAs is hardcoded except the 1/2/3/4/5/6 points per tier.** Jagex adds and
+  retunes CAs regularly, so the id→tier table is fetched live from the wiki's Bucket extension —
+  `bucket("combat_achievement").select("id","tier").limit(5000).run()`, one request, ~18 KB, the
+  same query the wiki's own `Module:Combat Achievements` runs. Task counts, per-tier point pools
+  and the reward thresholds are all **derived** from it in `ca.ts`. A tier's threshold is the
+  cumulative point pool of that tier and every lower tier (so Grandmaster = every CA point),
+  matching the wiki's `Module:Globals/data`. Today that derives to 655 tasks / 2697 points, but
+  those numbers appear nowhere in the code — don't reintroduce them.
+- **Ingest:** `POST /api/wiki/sync` (bearer `DISCORD_SYNC_SECRET` — that's the site's single shared
+  ingest secret despite the name). Walks the WOM roster `?batch=` members per run (default 20,
+  keeping it to 23 of the free tier's 50 subrequests), persisting every 5 so a CPU-limit kill
+  can't stall the cursor. At `cursor === 0` it refreshes the task table + roster and prunes
+  ex-members. `?mode=rescore` re-derives everyone's counts from stored data with **no** player
+  fetches — the cheap way to absorb a CA release immediately.
+- **Manifest** lives at `wiki/manifest.json` in the **existing `feprestige-drops` bucket** (no new
+  binding/env/DNS to hand off), read by the page over HTTP with tag `wiki-ca` + 1h revalidate. It
+  inlines the task table, so the page can never render counts against a mismatched table. Each
+  player stores a **base64 bitmap** of completed ids (~110 chars) alongside the derived counts,
+  which is what makes `rescore` possible.
+- **Staleness:** the sync API stamps responses with the *request* time, not the player's last sync,
+  so a member who quit two years ago looks identical to one who synced today. The manifest's per
+  player `u` (last time the numbers actually changed) is the only signal we have.
+- **Cron:** `7,27,47 * * * *` in `wrangler.jsonc`, dispatched in `custom-worker.ts` by matching
+  `controller.cron` against `WIKI_CRON` (keep the two in sync). Deliberately a different tick from
+  the drops `*/15` job, because the 50-subrequest cap is per invocation. A full pass over ~300
+  members takes ~4h, which is ample — the data only moves when a member reopens RuneLite.
+- **Manual fill / fallback:** `.github/workflows/wiki-sync.yml` (Actions tab → Run workflow) drains
+  the whole roster in one go by looping the route until it reports `wrapped: true`, with `mode` and
+  `batch` inputs. Use it to fill the board immediately instead of waiting out the cron, or to drive
+  the ingest from a network that can't reach `feprestige.com` (the dev Mac's corporate proxy 403s
+  it). Its `schedule:` is a deliberately light backup — a few batches every 6h — so it can't run
+  long enough to race the Cloudflare cron over the manifest.
+
 ## Conventions & gotchas (already solved — don't relearn the hard way)
 
 - **Worker size limit is 3 MiB compressed (Cloudflare free tier).** The Studio must load
@@ -150,8 +199,9 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
   the user to edit `.env.local`; don't try to read or write it.
 - **Local build fetch fails behind the corporate proxy:** Node's `fetch`/undici ignores
   `HTTPS_PROXY`, so build-time Sanity fetches time out on this machine (`curl` works because
-  it honors the proxy). This is a local-network wrinkle only — it works on Cloudflare. Fix
-  locally by giving undici a proxy dispatcher if a real local build is needed.
+  it honors the proxy). This is a local-network wrinkle only — it works on Cloudflare. On Node
+  24+ the fix is just `NODE_USE_ENV_PROXY=1 npm run build` (built-in env-proxy support) — no
+  undici dispatcher code needed. Verified working for a full build + `opennextjs-cloudflare build`.
 - `@/*` maps to `./src/*` — the `sanity/` dir lives at `src/sanity`, not the repo root.
 
 ## Commands

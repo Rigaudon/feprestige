@@ -103,6 +103,11 @@ export const siteSettings = defineType({
           type: "womTabHeader",
         }),
         defineField({ name: "gains", title: "Gains", type: "womTabHeader" }),
+        defineField({
+          name: "combat",
+          title: "Combat Achievements",
+          type: "womTabHeader",
+        }),
       ],
     }),
   ],

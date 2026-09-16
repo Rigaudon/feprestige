@@ -34,35 +34,75 @@ interface ExecutionCtx {
   waitUntil(promise: Promise<unknown>): void;
 }
 
+// Cloudflare tells us which trigger fired via `controller.cron`, matching the
+// expression in wrangler.jsonc verbatim.
+interface ScheduledController {
+  cron?: string;
+}
+
+// Keep in sync with wrangler.jsonc `triggers.crons`. Only the wiki schedule is
+// matched explicitly: if Cloudflare ever hands back a string we don't recognise
+// we fall through to the drops sync, so an unexpected value degrades to the
+// existing (and more time-sensitive) job rather than silently dropping it.
+const WIKI_CRON = "7,27,47 * * * *";
+
+const JOBS = {
+  drops: {
+    label: "Drops",
+    url: "https://feprestige.com/api/discord/sync?mode=incremental",
+  },
+  wiki: {
+    label: "Wiki CA",
+    url: "https://feprestige.com/api/wiki/sync",
+  },
+} as const;
+
 export default {
   // Delegate all HTTP traffic to the unmodified OpenNext handler. `fetch` uses no
   // `this`, so passing the method reference directly is safe (per the OpenNext howto).
   fetch: handler.fetch,
 
-  // Cloudflare Cron Trigger. Invokes the existing secret-gated sync route
-  // IN-PROCESS (a direct handler call, not an outbound fetch) so it runs the exact
-  // same code path as the manual/GitHub trigger with no extra network hop. The
-  // runtime secret DISCORD_SYNC_SECRET must be set on the worker
-  // (`npx wrangler secret put DISCORD_SYNC_SECRET`).
-  async scheduled(_controller: unknown, env: Env, ctx: ExecutionCtx) {
+  // Cloudflare Cron Triggers. Invokes the secret-gated sync routes IN-PROCESS (a
+  // direct handler call, not an outbound fetch) so they run the exact same code
+  // path as the manual/GitHub trigger with no extra network hop. The runtime
+  // secret DISCORD_SYNC_SECRET must be set on the worker
+  // (`npx wrangler secret put DISCORD_SYNC_SECRET`); both jobs share it.
+  //
+  // Two schedules, dispatched on the cron expression that fired:
+  //   */15 * * * *    -> Discord drops incremental sync
+  //   7,27,47 * * * * -> OSRS wiki combat-achievements batch
+  // They're deliberately on separate ticks: the 50-subrequest cap is per
+  // invocation, so running both in one would make them compete for it.
+  async scheduled(
+    controller: ScheduledController,
+    env: Env,
+    ctx: ExecutionCtx,
+  ) {
+    const job = controller?.cron === WIKI_CRON ? JOBS.wiki : JOBS.drops;
+
     const secret = env.DISCORD_SYNC_SECRET;
     if (!secret) {
-      console.error("Drops cron: DISCORD_SYNC_SECRET unset; skipping sync");
+      console.error(
+        `${job.label} cron: DISCORD_SYNC_SECRET unset; skipping sync`,
+      );
       return;
     }
-    const req = new Request(
-      "https://feprestige.com/api/discord/sync?mode=incremental",
-      { method: "POST", headers: { Authorization: `Bearer ${secret}` } },
-    );
+
+    const req = new Request(job.url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${secret}` },
+    });
     // Reuse the OpenNext fetch handler; it sets up the Cloudflare request context
     // the route needs (getCloudflareContext, revalidateTag).
     const run = handler
       .fetch(req, env, ctx)
       .then(async (res: Response) => {
-        console.log(`Drops cron: sync -> HTTP ${res.status} ${await res.text()}`);
+        console.log(
+          `${job.label} cron (${controller?.cron}): sync -> HTTP ${res.status} ${await res.text()}`,
+        );
       })
       .catch((err: unknown) => {
-        console.error("Drops cron: sync failed", err);
+        console.error(`${job.label} cron: sync failed`, err);
       });
     ctx.waitUntil(run);
   },

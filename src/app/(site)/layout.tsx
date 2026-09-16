@@ -18,9 +18,11 @@ export default async function SiteLayout({
     sanityFetch<NavItem[]>({ query: navQuery, fallback: [] }),
   ]);
 
-  // Live Wise Old Man tabs, shown only when a group id is set and the owner
-  // hasn't hidden them. These are code routes (not Sanity pages), so they're
-  // appended to the Sanity-driven nav.
+  // Live clan-stat tabs, shown only when a group id is set and the owner hasn't
+  // hidden them. These are code routes (not Sanity pages), so they're appended
+  // to the Sanity-driven nav. Combat Achievements comes from the OSRS wiki
+  // rather than WOM, but it walks the WOM group for its roster, so it's gated on
+  // the same settings.
   const womEnabled =
     Boolean(settings?.womGroupId) && settings?.showWomTabs !== false;
   const womNav = womEnabled
@@ -28,6 +30,7 @@ export default async function SiteLayout({
         { title: "Roster", href: "/roster" },
         { title: "Hiscores", href: "/hiscores" },
         { title: "Gains", href: "/gains" },
+        { title: "Combat Achv", href: "/combat-achievements" },
       ]
     : [];
 

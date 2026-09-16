@@ -7,7 +7,10 @@ import { sanityFetch } from "@/sanity/client";
 import { settingsQuery } from "@/sanity/queries";
 import type { Settings, WomTabHeader } from "@/sanity/types";
 
-export type WomTab = "roster" | "hiscores" | "gains";
+// "combat" is the wiki-sourced Combat Achievements tab (src/wiki/). It isn't WOM
+// data, but it hangs off the same WOM group id for its roster and uses the same
+// editor-controlled header, so it shares this helper.
+export type WomTab = "roster" | "hiscores" | "gains" | "combat";
 
 export interface WomPageSettings {
   groupId: number | null;

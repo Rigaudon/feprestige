@@ -43,6 +43,7 @@ export interface Settings {
     roster?: WomTabHeader;
     hiscores?: WomTabHeader;
     gains?: WomTabHeader;
+    combat?: WomTabHeader;
   };
 }
 

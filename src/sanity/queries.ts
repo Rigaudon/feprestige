@@ -25,7 +25,8 @@ export const settingsQuery = defineQuery(`*[_type == "siteSettings"][0]{
   womContent {
     roster { eyebrow, title, subtitle },
     hiscores { eyebrow, title, subtitle },
-    gains { eyebrow, title, subtitle }
+    gains { eyebrow, title, subtitle },
+    combat { eyebrow, title, subtitle }
   }
 }`);
 
