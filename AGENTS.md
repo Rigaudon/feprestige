@@ -163,6 +163,10 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
 
 ## Status
 
+Planned (design only, not built): a **team vs team events system** (clan bingo first) —
+a *separate* Cloudflare Worker at `feprestige.com/events/*`, Discord OAuth, Durable
+Object per event, SSE live board, Dink webhook ingest. See `EVENTS.md`.
+
 Scaffold complete and verified (build/lint clean, worker ~1.2 MiB). Project id is wired.
 Not yet done: seed content in the Studio (Site Settings + a home page), add CORS origins in
 Sanity for the prod URL, first deploy to Cloudflare, and the ownership-transfer handoff. See
