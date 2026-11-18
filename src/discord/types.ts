@@ -23,6 +23,7 @@ export interface DiscordUser {
   id: string;
   username: string;
   global_name?: string | null;
+  bot?: boolean;
 }
 
 export interface DiscordMessageSnapshot {
@@ -41,6 +42,7 @@ export interface DiscordMessage {
   attachments: DiscordAttachment[];
   mentions?: DiscordUser[];
   message_snapshots?: DiscordMessageSnapshot[];
+  author?: DiscordUser;
 }
 
 // One re-hosted drop, as stored in the manifest and read by the page. Short-ish

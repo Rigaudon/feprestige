@@ -150,7 +150,11 @@ logic. Outbound-only REST posting (free tier; no Gateway, nothing always-on).
 - **Kinds so far:** `hello-world` (template, unused) and `bounty` — one random raid from
   `RAIDS` (CoX/ToB/ToA/Fractured Archive) + 3 distinct random bosses. The boss pool is the
   `bosses` keys of the clan's WOM bulk-hiscores (group id from Sanity, shared 1h cache with the
-  Hiscores page; static `METRIC_PROPS` fallback), minus every raid/variant key.
+  Hiscores page; static `METRIC_PROPS` fallback), minus every raid/variant key. **No
+  back-to-back repeats:** it reads the channel history (up to 5×100 msgs) for the newest
+  *bot-authored* `Active Bounty:` post and excludes its raid + bosses — the channel is the state,
+  no storage. Needs Read Message History; if that read fails the tick errors instead of risking
+  a repeat.
 - **Manual:** `POST /api/discord/events` (bearer `DISCORD_SYNC_SECRET`) with `?dryRun=1`,
   `?at=<ISO|ms>`, or `?event=<id>&force=1` (post one event now, ignoring window/cron).
 - Distinct from the planned bingo/team events system in `EVENTS.md` (separate worker); a future
