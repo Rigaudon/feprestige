@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { formatNumber, womPlayerUrl } from "@/wom/format";
 import type { GainEntry } from "@/wom/leaderboards";
-import { type Metric, metricName } from "@/wom/metrics";
+import { type Metric, type MetricOption, metricName } from "@/wom/metrics";
 
 import { PlayerTypeIcon } from "./Icon";
 import { MetricSelect } from "./MetricSelect";
@@ -18,15 +18,18 @@ const PERIODS: { key: GainsPeriod; label: string }[] = [
   { key: "month", label: "This Month" },
 ];
 
-const pickDefault = (metrics: Metric[]) =>
-  metrics.includes("overall") ? "overall" : metrics[0];
+const has = (metrics: MetricOption[], id: Metric) =>
+  metrics.some((m) => m.id === id);
+
+const pickDefault = (metrics: MetricOption[]) =>
+  has(metrics, "overall") ? "overall" : metrics[0]?.id;
 
 export function GainsBoard({
   leaderboards,
   metrics,
 }: {
   leaderboards: Record<GainsPeriod, Record<string, GainEntry[]>>;
-  metrics: Record<GainsPeriod, Metric[]>;
+  metrics: Record<GainsPeriod, MetricOption[]>;
 }) {
   const [period, setPeriod] = useState<GainsPeriod>(
     metrics.week.length > 0 ? "week" : "month",
@@ -54,7 +57,7 @@ export function GainsBoard({
     setPeriod(p);
     setPage(0);
     // Keep the current metric if it exists for the new period; else fall back.
-    if (!metrics[p].includes(metric)) setMetric(pickDefault(metrics[p]));
+    if (!has(metrics[p], metric)) setMetric(pickDefault(metrics[p]));
   };
 
   return (

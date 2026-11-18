@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { type Metric, METRIC_PROPS, type MetricType, metricName } from "@/wom/metrics";
+import type { Metric, MetricOption, MetricType } from "@/wom/metrics";
 
 import { MetricIcon } from "./Icon";
 
@@ -27,11 +27,12 @@ export function MetricSelect({
 }: {
   value: Metric;
   onChange: (metric: Metric) => void;
-  metrics: Metric[];
+  metrics: MetricOption[];
   id?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const current = metrics.find((m) => m.id === value);
 
   // Close on outside click or Escape while the panel is open.
   useEffect(() => {
@@ -66,7 +67,7 @@ export function MetricSelect({
         className="flex min-w-44 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 font-display text-sm font-semibold uppercase tracking-wide text-fg outline-none transition-all hover:border-accent focus:border-accent active:scale-[0.98]"
       >
         <MetricIcon metric={value} size={18} />
-        <span className="truncate">{metricName(value)}</span>
+        <span className="truncate">{current?.name ?? value}</span>
         <svg
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -87,7 +88,7 @@ export function MetricSelect({
           className="absolute left-0 z-20 mt-1 max-h-80 w-64 overflow-auto rounded-lg border border-border bg-surface-2 py-1 shadow-xl shadow-black/40"
         >
           {GROUPS.map(({ type, label }) => {
-            const options = metrics.filter((m) => METRIC_PROPS[m].type === type);
+            const options = metrics.filter((m) => m.type === type);
             if (options.length === 0) return null;
             return (
               <div key={type}>
@@ -95,22 +96,22 @@ export function MetricSelect({
                   {label}
                 </div>
                 {options.map((m) => {
-                  const selected = m === value;
+                  const selected = m.id === value;
                   return (
                     <button
-                      key={m}
+                      key={m.id}
                       type="button"
                       role="option"
                       aria-selected={selected}
-                      onClick={() => select(m)}
+                      onClick={() => select(m.id)}
                       className={`flex w-full items-center gap-2 px-3 py-2 text-left font-display text-sm font-semibold tracking-wide transition-colors ${
                         selected
                           ? "bg-surface text-accent-strong"
                           : "text-fg hover:bg-surface"
                       }`}
                     >
-                      <MetricIcon metric={m} size={18} />
-                      <span className="truncate">{metricName(m)}</span>
+                      <MetricIcon metric={m.id} size={18} />
+                      <span className="truncate">{m.name}</span>
                     </button>
                   );
                 })}

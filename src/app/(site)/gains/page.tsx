@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import { GainsBoard } from "@/components/wom/GainsBoard";
 import { WomEmptyState } from "@/components/wom/WomEmptyState";
 import { WomHeader } from "@/components/wom/WomHeader";
-import {
-  availableMetrics,
-  buildGainLeaderboards,
-} from "@/wom/leaderboards";
+import { buildGainLeaderboards } from "@/wom/leaderboards";
 import { getBulkGroupGains } from "@/wom/queries";
 import { getWomPageSettings } from "@/wom/settings";
 
@@ -44,14 +41,10 @@ export default async function GainsPage() {
     getBulkGroupGains(groupId, "month"),
   ]);
 
-  const leaderboards = {
-    week: buildGainLeaderboards(week),
-    month: buildGainLeaderboards(month),
-  };
-  const metrics = {
-    week: availableMetrics(leaderboards.week),
-    month: availableMetrics(leaderboards.month),
-  };
+  const weekly = buildGainLeaderboards(week);
+  const monthly = buildGainLeaderboards(month);
+  const leaderboards = { week: weekly.boards, month: monthly.boards };
+  const metrics = { week: weekly.metrics, month: monthly.metrics };
   const hasAny = metrics.week.length > 0 || metrics.month.length > 0;
 
   return (

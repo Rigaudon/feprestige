@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { formatMetricValue, womPlayerUrl } from "@/wom/format";
 import type { LeaderEntry } from "@/wom/leaderboards";
-import { type Metric, METRIC_PROPS, metricName } from "@/wom/metrics";
+import { type Metric, type MetricOption, metricName } from "@/wom/metrics";
 
 import { PlayerTypeIcon } from "./Icon";
 import { MetricSelect } from "./MetricSelect";
@@ -17,10 +17,12 @@ export function HiscoresBoard({
   metrics,
 }: {
   leaderboards: Record<string, LeaderEntry[]>;
-  metrics: Metric[];
+  metrics: MetricOption[];
 }) {
   // Default to Overall when present, else the first available metric.
-  const initial = metrics.includes("overall") ? "overall" : metrics[0];
+  const initial = metrics.some((m) => m.id === "overall")
+    ? "overall"
+    : metrics[0].id;
   const [metric, setMetric] = useState<Metric>(initial);
   const [page, setPage] = useState(0);
 
@@ -34,7 +36,8 @@ export function HiscoresBoard({
     [entries, page],
   );
 
-  const isSkill = METRIC_PROPS[metric]?.type === "skill";
+  const type = metrics.find((m) => m.id === metric)?.type ?? "boss";
+  const isSkill = type === "skill";
 
   const selectMetric = (m: Metric) => {
     setMetric(m);
@@ -85,7 +88,7 @@ export function HiscoresBoard({
                 </span>
               ) : null}
               <span className="w-28 text-right font-display font-semibold tabular-nums text-fg">
-                {formatMetricValue(metric, e.v)}
+                {formatMetricValue(type, e.v)}
               </span>
             </li>
           );

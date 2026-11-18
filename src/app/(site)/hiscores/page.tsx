@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import { HiscoresBoard } from "@/components/wom/HiscoresBoard";
 import { WomEmptyState } from "@/components/wom/WomEmptyState";
 import { WomHeader } from "@/components/wom/WomHeader";
-import {
-  availableMetrics,
-  buildHiscoreLeaderboards,
-} from "@/wom/leaderboards";
+import { buildHiscoreLeaderboards } from "@/wom/leaderboards";
 import { getGroupBulkHiscores } from "@/wom/queries";
 import { getWomPageSettings } from "@/wom/settings";
 
@@ -41,8 +38,7 @@ export default async function HiscoresPage() {
 
   // Pre-sort into bounded top-N leaderboards per metric at build/revalidate time
   // (see leaderboards.ts) so the browser gets a small, ready-to-render payload.
-  const leaderboards = buildHiscoreLeaderboards(entries);
-  const metrics = availableMetrics(leaderboards);
+  const { boards: leaderboards, metrics } = buildHiscoreLeaderboards(entries);
 
   return (
     <>

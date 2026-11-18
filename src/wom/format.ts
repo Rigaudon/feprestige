@@ -1,6 +1,6 @@
 // Small presentation helpers shared by the roster / hiscores / gains UIs.
 
-import { METRIC_PROPS, type Metric } from "./metrics";
+import type { MetricType } from "./metrics";
 
 // Compact number formatting, e.g. 12_345_678 -> "12.3m", 45_600 -> "45.6k".
 export function formatNumber(value: number, compact = true): string {
@@ -22,9 +22,9 @@ export function formatRole(role: string | null | undefined): string {
 }
 
 // EHP/EHB and other computed values are hours — show one decimal.
-export function formatMetricValue(metric: Metric, value: number): string {
+export function formatMetricValue(type: MetricType, value: number): string {
   if (value < 0) return "—";
-  if (METRIC_PROPS[metric]?.type === "computed") {
+  if (type === "computed") {
     return value.toLocaleString("en-US", { maximumFractionDigits: 1 });
   }
   return formatNumber(value);
