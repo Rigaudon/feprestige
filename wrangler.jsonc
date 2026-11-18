@@ -62,10 +62,11 @@
   //                    separate tick from drops because the 50-subrequest cap is
   //                    per invocation. Keep in sync with WIKI_CRON in
   //                    custom-worker.ts.
-  //   0 */4 * * *      Scheduled Discord bot post (src/discord/scheduled-post.ts),
-  //                    every 4h on the hour (UTC). Keep in sync with POST_CRON in
-  //                    custom-worker.ts.
+  //   * * * * *        Base tick for scheduled Discord events (src/discord/events/).
+  //                    Each event's own window + crontab is evaluated in code, so
+  //                    schedule events in registry.ts, not here. Keep in sync
+  //                    with EVENTS_CRON in custom-worker.ts.
   "triggers": {
-    "crons": ["*/15 * * * *", "7,27,47 * * * *", "*/5 * * * *"]
+    "crons": ["*/15 * * * *", "7,27,47 * * * *", "* * * * *"]
   }
 }

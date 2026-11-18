@@ -70,7 +70,7 @@ src/app/(studio)/admin/[[...tool]]/   embedded Studio (client-only, ssr:false)
 src/app/api/revalidate/route.ts       signed Sanity webhook → revalidateTag
 src/app/api/discord/sync/route.ts     secret-gated Discord→R2 ingest (backfill/incremental/recaption)
 src/app/api/wiki/sync/route.ts        secret-gated OSRS wiki→R2 combat-achievements ingest
-src/app/api/discord/post/route.ts     secret-gated scheduled bot post (cron-driven; ?dryRun=1)
+src/app/api/discord/events/route.ts   secret-gated scheduled Discord event posts (cron-driven)
 src/components/       Nav, Footer, Hero, PortableText, Studio; drops/ (carousel, DiscordText); wom/; wiki/
 src/sanity/           client.ts env.ts image.ts queries.ts types.ts + schemaTypes/
 src/discord/          Drops ingest: env client messages sync types (re-hosts images to R2)
@@ -126,15 +126,35 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
   resolve (e.g. deleted users) degrade to a neutral chip. Run `?mode=recaption` once after a
   deploy to fix drops ingested before this existed.
 
-## Scheduled bot post — `src/discord/scheduled-post.ts`
+## Scheduled Discord events — `src/discord/events/`
 
-Outbound-only Discord posting on a Cloudflare cron (free tier; no Gateway, nothing always-on).
-Config is **in code**: schedule = `0 */4 * * *` in `wrangler.jsonc` **and** `POST_CRON` in
-`custom-worker.ts` (keep in sync); channel = `POST_CHANNEL_ID` (env `DISCORD_POST_CHANNEL_ID`,
-empty ⇒ no-op); content = `buildPost()` (return `null` to skip a tick — currently a hello-world
-placeholder). Posts with `allowed_mentions: {parse: []}` so it never pings. The bot needs View
-Channel + Send Messages in the target channel. Free plan allows only a handful of cron triggers
-per account, so add new post types inside `buildPost()` rather than as new crons.
+Short-lived (≈ a week) campaigns that post to a channel on their own schedule with their own
+logic. Outbound-only REST posting (free tier; no Gateway, nothing always-on).
+
+- **Kind vs instance.** A *kind* (`kinds/*.ts`) is reusable logic: a factory taking options and
+  returning a `PostBuilder` (`(ctx) => Promise<ScheduledPost | null>`; `null` skips the tick).
+  An *instance* is an entry in `registry.ts`: `id`, `channelId`, `start`/`end` (ISO with offset;
+  active while start <= tick < end), `cron` (5-field, numeric only), optional `timeZone` (IANA,
+  default UTC), and `post: someKind({...})`. To add an event: write/reuse a kind, add a registry
+  entry, commit, push, deploy. `kinds/hello-world.ts` is the template.
+- **One base tick.** Cloudflare crons are fixed at deploy and the free plan allows only a few,
+  so events don't get their own triggers. `* * * * *` (`wrangler.jsonc` + `EVENTS_CRON` in
+  `custom-worker.ts`, keep in sync) calls `/api/discord/events?at=<scheduledTime>` every minute;
+  `run.ts` posts for each event whose window contains that minute and whose crontab matches it
+  (`cron.ts`, Vixie DOM/DOW semantics). Matching uses the tick's *scheduled* minute, so a late
+  invocation still matches. A missed tick is just skipped (no catch-up, no dedupe state).
+- **Isolation.** Each event is try/caught; a bad crontab or failed post shows up as
+  `status: "error"` in the route's JSON and doesn't block the others. Posts use
+  `allowed_mentions: {parse: []}` so they never ping. The bot needs View Channel + Send
+  Messages in each target channel.
+- **Kinds so far:** `hello-world` (template, unused) and `bounty` — one random raid from
+  `RAIDS` (CoX/ToB/ToA/Fractured Archive) + 3 distinct random bosses. The boss pool is the
+  `bosses` keys of the clan's WOM bulk-hiscores (group id from Sanity, shared 1h cache with the
+  Hiscores page; static `METRIC_PROPS` fallback), minus every raid/variant key.
+- **Manual:** `POST /api/discord/events` (bearer `DISCORD_SYNC_SECRET`) with `?dryRun=1`,
+  `?at=<ISO|ms>`, or `?event=<id>&force=1` (post one event now, ignoring window/cron).
+- Distinct from the planned bingo/team events system in `EVENTS.md` (separate worker); a future
+  kind could read that system's state.
 
 ## Combat Achievements — `src/wiki/`
 

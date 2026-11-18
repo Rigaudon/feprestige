@@ -38,6 +38,8 @@ interface ExecutionCtx {
 // expression in wrangler.jsonc verbatim.
 interface ScheduledController {
   cron?: string;
+  /** Epoch ms of the minute this tick was scheduled for. */
+  scheduledTime?: number;
 }
 
 // Keep in sync with wrangler.jsonc `triggers.crons`. Only the wiki schedule is
@@ -45,9 +47,10 @@ interface ScheduledController {
 // we fall through to the drops sync, so an unexpected value degrades to the
 // existing (and more time-sensitive) job rather than silently dropping it.
 const WIKI_CRON = "7,27,47 * * * *";
-// Scheduled bot post (src/discord/scheduled-post.ts). Change the schedule here
-// AND in wrangler.jsonc together.
-const POST_CRON = "*/5 * * * *"; // TEMP live test; restore "0 */4 * * *"
+// Base tick for scheduled Discord events (src/discord/events/). Every minute, so
+// each event's own crontab (evaluated in code) can name any minute. Don't put a
+// per-event schedule here — edit src/discord/events/registry.ts instead.
+const EVENTS_CRON = "* * * * *";
 
 const JOBS = {
   drops: {
@@ -58,15 +61,15 @@ const JOBS = {
     label: "Wiki CA",
     url: "https://feprestige.com/api/wiki/sync",
   },
-  post: {
-    label: "Discord post",
-    url: "https://feprestige.com/api/discord/post",
+  events: {
+    label: "Discord events",
+    url: "https://feprestige.com/api/discord/events",
   },
 } as const;
 
 const JOB_BY_CRON: Record<string, (typeof JOBS)[keyof typeof JOBS]> = {
   [WIKI_CRON]: JOBS.wiki,
-  [POST_CRON]: JOBS.post,
+  [EVENTS_CRON]: JOBS.events,
 };
 
 export default {
@@ -83,7 +86,7 @@ export default {
   // Schedules, dispatched on the cron expression that fired:
   //   */15 * * * *    -> Discord drops incremental sync
   //   7,27,47 * * * * -> OSRS wiki combat-achievements batch
-  //   0 */4 * * *     -> scheduled Discord bot post
+  //   * * * * *       -> Discord events tick (each event has its own crontab)
   // Each cron fires its own invocation, so jobs never share the per-invocation
   // 50-subrequest cap even when their ticks coincide (e.g. :00 for drops+post).
   async scheduled(
@@ -102,7 +105,13 @@ export default {
       return;
     }
 
-    const req = new Request(job.url, {
+    // Events match their crontabs against the tick's scheduled minute, not
+    // whenever the invocation happens to start.
+    const url =
+      job === JOBS.events && controller?.scheduledTime
+        ? `${job.url}?at=${controller.scheduledTime}`
+        : job.url;
+    const req = new Request(url, {
       method: "POST",
       headers: { Authorization: `Bearer ${secret}` },
     });
