@@ -45,6 +45,9 @@ interface ScheduledController {
 // we fall through to the drops sync, so an unexpected value degrades to the
 // existing (and more time-sensitive) job rather than silently dropping it.
 const WIKI_CRON = "7,27,47 * * * *";
+// Scheduled bot post (src/discord/scheduled-post.ts). Change the schedule here
+// AND in wrangler.jsonc together.
+const POST_CRON = "*/5 * * * *"; // TEMP live test; restore "0 */4 * * *"
 
 const JOBS = {
   drops: {
@@ -55,7 +58,16 @@ const JOBS = {
     label: "Wiki CA",
     url: "https://feprestige.com/api/wiki/sync",
   },
+  post: {
+    label: "Discord post",
+    url: "https://feprestige.com/api/discord/post",
+  },
 } as const;
+
+const JOB_BY_CRON: Record<string, (typeof JOBS)[keyof typeof JOBS]> = {
+  [WIKI_CRON]: JOBS.wiki,
+  [POST_CRON]: JOBS.post,
+};
 
 export default {
   // Delegate all HTTP traffic to the unmodified OpenNext handler. `fetch` uses no
@@ -68,22 +80,24 @@ export default {
   // secret DISCORD_SYNC_SECRET must be set on the worker
   // (`npx wrangler secret put DISCORD_SYNC_SECRET`); both jobs share it.
   //
-  // Two schedules, dispatched on the cron expression that fired:
+  // Schedules, dispatched on the cron expression that fired:
   //   */15 * * * *    -> Discord drops incremental sync
   //   7,27,47 * * * * -> OSRS wiki combat-achievements batch
-  // They're deliberately on separate ticks: the 50-subrequest cap is per
-  // invocation, so running both in one would make them compete for it.
+  //   0 */4 * * *     -> scheduled Discord bot post
+  // Each cron fires its own invocation, so jobs never share the per-invocation
+  // 50-subrequest cap even when their ticks coincide (e.g. :00 for drops+post).
   async scheduled(
     controller: ScheduledController,
     env: Env,
     ctx: ExecutionCtx,
   ) {
-    const job = controller?.cron === WIKI_CRON ? JOBS.wiki : JOBS.drops;
+    const job =
+      (controller?.cron && JOB_BY_CRON[controller.cron]) || JOBS.drops;
 
     const secret = env.DISCORD_SYNC_SECRET;
     if (!secret) {
       console.error(
-        `${job.label} cron: DISCORD_SYNC_SECRET unset; skipping sync`,
+        `${job.label} cron: DISCORD_SYNC_SECRET unset; skipping`,
       );
       return;
     }

@@ -10,7 +10,7 @@
     "clean:cache": "node -e \"require('fs').rmSync('.next/cache',{recursive:true,force:true})\"",
     "prepreview": "npm run clean:cache",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "predeploy": "npm run clean:cache",
+    "predeploy": "node scripts/check-deploy.mjs && npm run clean:cache",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "preupload": "npm run clean:cache",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",

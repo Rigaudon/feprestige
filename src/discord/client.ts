@@ -16,16 +16,27 @@ const DISCORD_API = "https://discord.com/api/v10";
 const USER_AGENT = "FE Prestige clan site (github.com/feprestige)";
 
 /**
- * Authenticated Discord REST GET. Server-only. Retries a couple of times on 429
- * using the server-provided retry delay, then throws on any non-2xx.
+ * Authenticated Discord REST call (GET by default; pass `body` to send JSON).
+ * Server-only. Retries a couple of times on 429 using the server-provided retry
+ * delay, then throws on any non-2xx.
  */
-export async function discordFetch<T>(path: string): Promise<T> {
+export async function discordFetch<T>(
+  path: string,
+  init: { method?: "GET" | "POST"; body?: unknown } = {},
+): Promise<T> {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) throw new Error("DISCORD_BOT_TOKEN is not set");
 
   for (let attempt = 0; attempt < 3; attempt++) {
+    const hasBody = init.body !== undefined;
     const res = await fetch(`${DISCORD_API}${path}`, {
-      headers: { Authorization: `Bot ${token}`, "User-Agent": USER_AGENT },
+      method: init.method ?? (hasBody ? "POST" : "GET"),
+      headers: {
+        Authorization: `Bot ${token}`,
+        "User-Agent": USER_AGENT,
+        ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      },
+      body: hasBody ? JSON.stringify(init.body) : undefined,
       cache: "no-store",
     });
 

@@ -70,6 +70,7 @@ src/app/(studio)/admin/[[...tool]]/   embedded Studio (client-only, ssr:false)
 src/app/api/revalidate/route.ts       signed Sanity webhook → revalidateTag
 src/app/api/discord/sync/route.ts     secret-gated Discord→R2 ingest (backfill/incremental/recaption)
 src/app/api/wiki/sync/route.ts        secret-gated OSRS wiki→R2 combat-achievements ingest
+src/app/api/discord/post/route.ts     secret-gated scheduled bot post (cron-driven; ?dryRun=1)
 src/components/       Nav, Footer, Hero, PortableText, Studio; drops/ (carousel, DiscordText); wom/; wiki/
 src/sanity/           client.ts env.ts image.ts queries.ts types.ts + schemaTypes/
 src/discord/          Drops ingest: env client messages sync types (re-hosts images to R2)
@@ -124,6 +125,16 @@ drops). Unlike Sanity content, it's a separate ingest → storage → read pipel
   are cached in the manifest's `users` map (fetched once, ever). Only ids that no longer
   resolve (e.g. deleted users) degrade to a neutral chip. Run `?mode=recaption` once after a
   deploy to fix drops ingested before this existed.
+
+## Scheduled bot post — `src/discord/scheduled-post.ts`
+
+Outbound-only Discord posting on a Cloudflare cron (free tier; no Gateway, nothing always-on).
+Config is **in code**: schedule = `0 */4 * * *` in `wrangler.jsonc` **and** `POST_CRON` in
+`custom-worker.ts` (keep in sync); channel = `POST_CHANNEL_ID` (env `DISCORD_POST_CHANNEL_ID`,
+empty ⇒ no-op); content = `buildPost()` (return `null` to skip a tick — currently a hello-world
+placeholder). Posts with `allowed_mentions: {parse: []}` so it never pings. The bot needs View
+Channel + Send Messages in the target channel. Free plan allows only a handful of cron triggers
+per account, so add new post types inside `buildPost()` rather than as new crons.
 
 ## Combat Achievements — `src/wiki/`
 
@@ -208,7 +219,11 @@ request **per member**, which can't happen in a page render.
 
 - `npm run dev` — site + Studio at `/admin`
 - `npm run build` / `npm run lint` — verify
-- `npm run preview` / `npm run deploy` — OpenNext build → Cloudflare (preview / deploy)
+- `npm run preview` / `npm run deploy` — OpenNext build → Cloudflare (preview / deploy).
+  **Deploys must come from pushed `main`:** `predeploy` runs `scripts/check-deploy.mjs`, which
+  aborts unless on `main`, the tree is clean (incl. untracked), and HEAD == freshly-fetched
+  `origin/main`. So: commit → push → deploy. Emergency override: `SKIP_DEPLOY_CHECK=1`.
+  From the Mac, prefix with `NODE_USE_ENV_PROXY=1` (corporate proxy).
 - `npm run typegen` — optional Sanity TypeGen for exact content types
 
 ## Status
