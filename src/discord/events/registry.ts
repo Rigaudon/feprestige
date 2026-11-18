@@ -12,13 +12,14 @@ import type { ScheduledEvent } from "./types";
 const TEST_CHANNEL = "1572689016845766656";
 
 export const EVENTS: ScheduledEvent[] = [
-  // TESTING: posts every minute to the test channel. Before going live, set the
-  // real channel, window and cadence (e.g. weekly: "0 0 * * 1").
+  // OFF: window ended 2026-11-18 after testing (every minute, test channel).
+  // To re-enable, move `end` into the future. Before going live, set the real
+  // channel, window and cadence (e.g. weekly: "0 0 * * 1").
   {
     id: "bounty-test",
     channelId: TEST_CHANNEL,
     start: "2026-11-18T00:00:00Z",
-    end: "2026-12-31T00:00:00Z",
+    end: "2026-11-18T19:45:00Z",
     cron: "* * * * *",
     timeZone: "UTC",
     post: bounty(),
