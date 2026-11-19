@@ -58,7 +58,8 @@ export interface BountyOptions {
 async function womBossKeys(): Promise<string[]> {
   const { groupId } = await getWomPageSettings("hiscores");
   if (groupId) {
-    const entries = await getGroupBulkHiscores(groupId);
+    // womFetch throws at runtime when WOM is down; the static table is fine here.
+    const entries = await getGroupBulkHiscores(groupId).catch(() => []);
     const bosses = entries.find((e) => e.data?.data?.bosses)?.data.data.bosses;
     if (bosses && Object.keys(bosses).length > 0) return Object.keys(bosses);
   }

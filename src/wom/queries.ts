@@ -1,5 +1,5 @@
-// Typed WOM query helpers over `womFetch`. Each returns a safe empty fallback so
-// pages render an empty state when the group id is unset or the API is down.
+// Typed WOM query helpers over `womFetch`. The fallbacks only apply at build time;
+// at runtime a WOM failure throws so ISR keeps the last good page (see client.ts).
 
 import { womFetch } from "./client";
 import type { MetricType } from "./metrics";
